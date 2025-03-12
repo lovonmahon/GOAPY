@@ -18,6 +18,12 @@ public sealed class GoapAgent : MonoBehaviour {
 	private IGoap dataProvider; // this is the implementing class that provides our world data and listens to feedback on planning
 
 	private GoapPlanner planner;
+	   
+	#region custom interruption
+	// === NEW: Store interrupted action ===
+    private GoapAction lastInterruptedAction; // Store last interrupted action
+    private bool hasInterrupted = false; // Flag to check if interrupted
+	#endregion
 
 
 	void Start () {
@@ -177,6 +183,36 @@ public sealed class GoapAgent : MonoBehaviour {
 		}
 		Debug.Log("Found actions: " + actions);
 	}
+
+	#region interrupt actions(custom implemenation)
+	// Interrupt current action
+    public void InterruptAction() {
+        if (currentActions.Count > 0) {
+            lastInterruptedAction = currentActions.Peek();  // Store the interrupted action
+            Debug.Log("Action interrupted: " + lastInterruptedAction.name);
+        }
+
+        currentActions.Clear();  // Clear the current action queue
+        stateMachine.popState(); // Pop the perform action state
+        stateMachine.pushState(idleState); // Move back to Idle state
+    }
+
+    //Resume interrupted action
+    public void ResumeAction() 
+	{
+    	if (lastInterruptedAction != null) 
+		{
+    	    if (lastInterruptedAction != null && !lastInterruptedAction.isInterrupted()) { // Ensure the action can be resumed
+    	        Debug.Log("Resuming interrupted action: " + lastInterruptedAction.name);
+    	        currentActions.Enqueue(lastInterruptedAction);  // Re-enqueue the interrupted action
+    	        lastInterruptedAction = null;
+    	        stateMachine.pushState(performActionState); // Resume performing action
+    	    } else {
+    	        Debug.Log("The action cannot be resumed yet.");
+    	    }
+    	}
+	}
+	#endregion
 
 	public IGoap DataProvider()
 	{

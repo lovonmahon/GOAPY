@@ -15,6 +15,12 @@ public abstract class GoapAction : MonoBehaviour {
 	 * Changing it will affect what actions are chosen during planning.*/
 	public float cost = 1f;
 
+	#region custom interruptions
+	private bool interrupted = false; // Whether the action was interrupted
+    private bool isResumed = false; // Whether the action is resumed after interruption
+
+	#endregion 
+
 	/**
 	 * An action often has to perform on an object. This is that object. Can be null. */
 	[SerializeField] public GameObject target;
@@ -75,6 +81,38 @@ public abstract class GoapAction : MonoBehaviour {
 	public void setInRange(bool inRange) {
 		this.inRange = inRange;
 	}
+
+	#region custom interruptions
+	 // Method to call when the action is interrupted
+    public void interrupt() 
+	{
+        interrupted = true;
+        // Add any additional logic here to save state or prepare for resumption
+        Debug.Log(name + " was interrupted.");
+    }
+
+    // Method to check if the action is interrupted
+    public bool isInterrupted() 
+	{
+        return interrupted;
+    }
+
+    // Method to resume the action if it was interrupted
+    public void resumeAction() 
+	{
+        if (interrupted) {
+            interrupted = false;
+            isResumed = true;
+            Debug.Log(name + " is resumed.");
+        }
+    }
+
+    // Check if the action has been resumed after interruption
+    public bool isResumedAfterInterrupt() 
+	{
+        return isResumed;
+    }
+	#endregion
 
 
 	public void addPrecondition(string key, object value) {

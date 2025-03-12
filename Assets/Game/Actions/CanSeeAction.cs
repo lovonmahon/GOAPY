@@ -10,11 +10,15 @@ public class CanSeeAction : GoapAction {
 	bool m_sawPlayer = false;
     Animator anim;
     Sight sight;
+	#region custom interrupt
+	GoapAgent goapAgent;
+	#endregion
 
 	void Start()
     {
         anim = gameObject.GetComponentInChildren<Animator>();
         sight = gameObject.GetComponent<Sight>();        
+		goapAgent = gameObject.GetComponent<GoapAgent>();
     }
     
     public CanSeeAction(){
@@ -43,7 +47,7 @@ public class CanSeeAction : GoapAction {
 
 	public override bool checkProceduralPrecondition(GameObject agent)
 	{
-		if( sight.isInFOV == true)
+		if (sight.isInFOV == true)
 		{
 			target = GameObject.FindGameObjectWithTag("Player");
 			if (target != null)
@@ -57,12 +61,20 @@ public class CanSeeAction : GoapAction {
 
 	public override bool perform(GameObject agent)
 	{
-		m_sawPlayer = true;
-        Debug.Log("Ah ketch eem!");	
+		 // Only perform the action if the player is visible
+    	if (!m_sawPlayer && sight.isInFOV)
+    	{
+    	    m_sawPlayer = true;
+    	    Debug.Log("Ah ketch eem!");    
 
-		// GetComponent<Worker>().SetHide(true);
-	    return m_sawPlayer;
-	    
-        // return true;
+    	    // Interrupt the current action if agent sees the player
+    	    GoapAgent goapAgent = agent.GetComponent<GoapAgent>();
+    	    if (goapAgent != null) 
+    	    {
+    	        goapAgent.InterruptAction(); // Interrupt current action and replan
+    	    }
+    	}
+
+    	return m_sawPlayer;
 	}
 }
