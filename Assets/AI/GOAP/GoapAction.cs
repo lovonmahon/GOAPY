@@ -1,161 +1,160 @@
-
 using UnityEngine;
 using System.Collections.Generic;
 
 public abstract class GoapAction : MonoBehaviour {
 
-	public new string name = "No Name";
-	private HashSet<KeyValuePair<string,object>> preconditions;
-	private HashSet<KeyValuePair<string,object>> effects;
+    public string name = "No Name";
+    private HashSet<KeyValuePair<string,object>> preconditions;
+    private HashSet<KeyValuePair<string,object>> effects;
 
-	private bool inRange = false;
+    private bool inRange = false;
 
-	/* The cost of performing the action. 
-	 * Figure out a weight that suits the action. 
-	 * Changing it will affect what actions are chosen during planning.*/
-	public float cost = 1f;
+    /* The cost of performing the action. 
+     * Figure out a weight that suits the action. 
+     * Changing it will affect what actions are chosen during planning.*/
+    public float cost = 1f;
 
-	#region custom interruptions
-	private bool interrupted = false; // Whether the action was interrupted
+    /**
+     * An action often has to perform on an object. This is that object. Can be null. */
+    public GameObject target;
+
+    // New variables to manage interruptions
+    private bool interrupted = false; // Whether the action was interrupted
     private bool isResumed = false; // Whether the action is resumed after interruption
 
-	#endregion 
+    public GoapAction() {
+        preconditions = new HashSet<KeyValuePair<string, object>> ();
+        effects = new HashSet<KeyValuePair<string, object>> ();
+    }
 
-	/**
-	 * An action often has to perform on an object. This is that object. Can be null. */
-	[SerializeField] public GameObject target;
+    public void doReset() {
+        inRange = false;
+        target = null;
+        reset ();
+    }
 
-	public GoapAction() {
-		preconditions = new HashSet<KeyValuePair<string, object>> ();
-		effects = new HashSet<KeyValuePair<string, object>> ();
-		//target = target;
-	}
+    /**
+     * Reset any variables that need to be reset before planning happens again.
+     */
+    public abstract void reset();
 
-	public void doReset() {
-		inRange = false;
-		//RR tweak. Delete if not working as intended.
-		target = null;
-		//
-		reset ();
-	}
+    /**
+     * Is the action done?
+     */
+    public abstract bool isDone();
 
-	/**
-	 * Reset any variables that need to be reset before planning happens again.
-	 */
-	public abstract void reset();
+    /**
+     * Procedurally check if this action can run. Not all actions
+     * will need this, but some might.
+     */
+    public abstract bool checkProceduralPrecondition(GameObject agent);
 
-	/**
-	 * Is the action done?
-	 */
-	public abstract bool isDone();
+    /**
+     * Run the action.
+     * Returns True if the action performed successfully or false
+     * if something happened and it can no longer perform. In this case
+     * the action queue should clear out and the goal cannot be reached.
+     */
+    public abstract bool perform(GameObject agent);
 
-	/**
-	 * Procedurally check if this action can run. Not all actions
-	 * will need this, but some might.
-	 */
-	public abstract bool checkProceduralPrecondition(GameObject agent);
+    /**
+     * Does this action need to be within range of a target game object?
+     * If not then the moveTo state will not need to run for this action.
+     */
+    public abstract bool requiresInRange ();
+    
 
-	/**
-	 * Run the action.
-	 * Returns True if the action performed successfully or false
-	 * if something happened and it can no longer perform. In this case
-	 * the action queue should clear out and the goal cannot be reached.
-	 */
-	public abstract bool perform(GameObject agent);
+    /**
+     * Are we in range of the target?
+     * The MoveTo state will set this and it gets reset each time this action is performed.
+     */
+    public bool isInRange () {
+        return inRange;
+    }
+    
+    public void setInRange(bool inRange) {
+        this.inRange = inRange;
+    }
 
-	/**
-	 * Does this action need to be within range of a target game object?
-	 * If not then the moveTo state will not need to run for this action.
-	 */
-	public abstract bool requiresInRange ();
-	
 
-	/**
-	 * Are we in range of the target?
-	 * The MoveTo state will set this and it gets reset each time this action is performed.
-	 */
-	public bool isInRange () {
-		return inRange;
-	}
-	
-	public void setInRange(bool inRange) {
-		this.inRange = inRange;
-	}
+    // Highlighted Change: Interrupt handling methods
 
-	#region custom interruptions
-	 // Method to call when the action is interrupted
-    public void interrupt() 
-	{
+    // Method to call when the action is interrupted
+    public void interrupt() {
         interrupted = true;
-        // Add any additional logic here to save state or prepare for resumption
+        saveState();  // Save the state on interruption
         Debug.Log(name + " was interrupted.");
     }
 
     // Method to check if the action is interrupted
-    public bool isInterrupted() 
-	{
+    public bool isInterrupted() {
         return interrupted;
     }
 
     // Method to resume the action if it was interrupted
-    public void resumeAction() 
-	{
+    public void resumeAction() {
         if (interrupted) {
             interrupted = false;
             isResumed = true;
             Debug.Log(name + " is resumed.");
+            restoreState();  // Restore the state after resumption
         }
     }
 
     // Check if the action has been resumed after interruption
-    public bool isResumedAfterInterrupt() 
-	{
+    public bool isResumedAfterInterrupt() {
         return isResumed;
     }
-	#endregion
 
+    // New method to save action state before interruption
+    public virtual void saveState() {
+        // Save any relevant state here, e.g., target position, progress, etc.
+        // Example: save position, target, or any progress data needed for resumption.
+    }
 
-	public void addPrecondition(string key, object value) {
-		preconditions.Add (new KeyValuePair<string, object>(key, value) );
-	}
+    // New method to restore the saved state when the action is resumed
+    public virtual void restoreState() {
+        // Restore the saved state here
+        // Example: restore position, progress, target, etc. from the saved state.
+    }
 
+    public void addPrecondition(string key, object value) {
+        preconditions.Add(new KeyValuePair<string, object>(key, value));
+    }
 
-	public void removePrecondition(string key) {
-		KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
-		foreach (KeyValuePair<string, object> kvp in preconditions) {
-			if (kvp.Key.Equals (key)) 
-				remove = kvp;
-		}
-		if ( !default(KeyValuePair<string,object>).Equals(remove) )
-			preconditions.Remove (remove);
-	}
+    public void removePrecondition(string key) {
+        KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
+        foreach (KeyValuePair<string, object> kvp in preconditions) {
+            if (kvp.Key.Equals(key)) 
+                remove = kvp;
+        }
+        if (!default(KeyValuePair<string,object>).Equals(remove))
+            preconditions.Remove(remove);
+    }
 
+    public void addEffect(string key, object value) {
+        effects.Add(new KeyValuePair<string, object>(key, value));
+    }
 
-	public void addEffect(string key, object value) {
-		effects.Add (new KeyValuePair<string, object>(key, value) );
-	}
+    public void removeEffect(string key) {
+        KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
+        foreach (KeyValuePair<string, object> kvp in effects) {
+            if (kvp.Key.Equals(key)) 
+                remove = kvp;
+        }
+        if (!default(KeyValuePair<string,object>).Equals(remove))
+            effects.Remove(remove);
+    }
 
+    public HashSet<KeyValuePair<string, object>> Preconditions {
+        get {
+            return preconditions;
+        }
+    }
 
-	public void removeEffect(string key) {
-		KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
-		foreach (KeyValuePair<string, object> kvp in effects) {
-			if (kvp.Key.Equals (key)) 
-				remove = kvp;
-		}
-		if ( !default(KeyValuePair<string,object>).Equals(remove) )
-			effects.Remove (remove);
-	}
-
-	
-	public HashSet<KeyValuePair<string, object>> Preconditions {
-		get {
-			return preconditions;
-		}
-	}
-
-	public HashSet<KeyValuePair<string, object>> Effects {
-		get {
-			return effects;
-		}
-	}
+    public HashSet<KeyValuePair<string, object>> Effects {
+        get {
+            return effects;
+        }
+    }
 }

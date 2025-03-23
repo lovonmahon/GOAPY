@@ -3,189 +3,184 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-
 public sealed class GoapAgent : MonoBehaviour {
 
-	private FSM stateMachine;
+    private FSM stateMachine;
 
-	private FSM.FSMState idleState; // finds something to do
-	private FSM.FSMState moveToState; // moves to a target
-	private FSM.FSMState performActionState; // performs an action
-	
-	private HashSet<GoapAction> availableActions;
-	private Queue<GoapAction> currentActions;
+    private FSM.FSMState idleState; // finds something to do
+    private FSM.FSMState moveToState; // moves to a target
+    private FSM.FSMState performActionState; // performs an action
+    
+    private HashSet<GoapAction> availableActions;
+    private Queue<GoapAction> currentActions;
 
-	private IGoap dataProvider; // this is the implementing class that provides our world data and listens to feedback on planning
+    private IGoap dataProvider; // this is the implementing class that provides our world data and listens to feedback on planning
 
-	private GoapPlanner planner;
-	   
-	#region custom interruption
-	// === NEW: Store interrupted action ===
+    private GoapPlanner planner;
+    // === NEW: Store interrupted action ===
     private GoapAction lastInterruptedAction; // Store last interrupted action
-    private bool hasInterrupted = false; // Flag to check if interrupted
-	#endregion
+    // === REMOVED: Removed hasInterrupted flag ===
 
 
-	void Start () {
-		stateMachine = new FSM ();
-		availableActions = new HashSet<GoapAction> ();
-		currentActions = new Queue<GoapAction> ();
-		planner = new GoapPlanner ();
-		FindDataProvider ();
-		CreateIdleState ();
-		CreateMoveToState ();
-		CreatePerformActionState ();
-		stateMachine.pushState (idleState);
-		LoadActions ();
-	}
-	
+    void Start () {
+        stateMachine = new FSM ();
+        availableActions = new HashSet<GoapAction> ();
+        currentActions = new Queue<GoapAction> ();
+        planner = new GoapPlanner ();
+        FindDataProvider ();
+        CreateIdleState ();
+        CreateMoveToState ();
+        CreatePerformActionState ();
+        stateMachine.pushState (idleState);
+        LoadActions ();
+    }
+    
 
-	void Update () {
-		stateMachine.Update (this.gameObject);
-	}
+    void Update () {
+        stateMachine.Update (this.gameObject);
+    }
 
 
-	public void AddAction(GoapAction a) {
-		availableActions.Add (a);
-	}
+    public void AddAction(GoapAction a) {
+        availableActions.Add (a);
+    }
 
-	public GoapAction GetAction(Type action) {
-		foreach (GoapAction g in availableActions) {
-			if (g.GetType().Equals(action) )
-			    return g;
-		}
-		return null;
-	}
+    public GoapAction GetAction(Type action) {
+        foreach (GoapAction g in availableActions) {
+            if (g.GetType().Equals(action) )
+                return g;
+        }
+        return null;
+    }
 
-	public void RemoveAction(GoapAction action) {
-		availableActions.Remove (action);
-	}
+    public void RemoveAction(GoapAction action) {
+        availableActions.Remove (action);
+    }
 
-	private bool HasActionPlan() {
-		return currentActions.Count > 0;
-	}
+    private bool HasActionPlan() {
+        return currentActions.Count > 0;
+    }
 
-	private void CreateIdleState() {
-		idleState = (fsm, gameObj) => {
-			// GOAP planning
+    private void CreateIdleState() {
+        idleState = (fsm, gameObj) => {
+            // GOAP planning
 
-			// get the world state and the goal we want to plan for
-			HashSet<KeyValuePair<string,object>> worldState = dataProvider.GetWorldState();
-			HashSet<KeyValuePair<string,object>> goal = dataProvider.CreateGoalState();
+            // get the world state and the goal we want to plan for
+            HashSet<KeyValuePair<string,object>> worldState = dataProvider.GetWorldState();
+            HashSet<KeyValuePair<string,object>> goal = dataProvider.CreateGoalState();
 
-			// Plan
-			Queue<GoapAction> plan = planner.plan(gameObject, availableActions, worldState, goal);
-			if (plan != null) {
-				// we have a plan, hooray!
-				currentActions = plan;
-				dataProvider.PlanFound(goal, plan);
+            // Plan
+            Queue<GoapAction> plan = planner.plan(gameObject, availableActions, worldState, goal);
+            if (plan != null) {
+                // we have a plan, hooray!
+                currentActions = plan;
+                dataProvider.PlanFound(goal, plan);
 
-				fsm.popState(); // move to PerformAction state
-				fsm.pushState(performActionState);
+                fsm.popState(); // move to PerformAction state
+                fsm.pushState(performActionState);
 
-			} else {
-				// ugh, we couldn't get a plan
-				Debug.Log("Failed Plan: " + goal);
-				dataProvider.PlanFailed(goal);
-				fsm.popState (); // move back to IdleAction state
-				fsm.pushState (idleState);
-			}
+            } else {
+                // ugh, we couldn't get a plan
+                Debug.Log("Failed Plan: " + goal);
+                dataProvider.PlanFailed(goal);
+                fsm.popState (); // move back to IdleAction state
+                fsm.pushState (idleState);
+            }
 
-		};
-	}
-	
-	private void CreateMoveToState() {
-		moveToState = (fsm, gameObj) => {
-			// move the game object
+        };
+    }
+    
+    private void CreateMoveToState() {
+        moveToState = (fsm, gameObj) => {
+            // move the game object
 
-			GoapAction action = currentActions.Peek();
-			if (action.requiresInRange() && action.target == null) {
-				Debug.Log("Fatal error: Action requires a target but has none. Planning failed. You did not assign the target in your Action.checkProceduralPrecondition()");
-				fsm.popState(); // move
-				fsm.popState(); // perform
-				fsm.pushState(idleState);
-				return;
-			}
+            GoapAction action = currentActions.Peek();
+            if (action.requiresInRange() && action.target == null) {
+                Debug.Log("Fatal error: Action requires a target but has none. Planning failed. You did not assign the target in your Action.checkProceduralPrecondition()");
+                fsm.popState(); // move
+                fsm.popState(); // perform
+                fsm.pushState(idleState);
+                return;
+            }
 
-			// get the agent to move itself
-			// Debug.Log("Move to do: " + action.name);
-			if ( dataProvider.MoveAgent(action) ) {
-				fsm.popState();
-			}
-		};
-	}
-	
-	private void CreatePerformActionState() {
+            // get the agent to move itself
+            Debug.Log("Move to do: " + action.name);
+            if ( dataProvider.MoveAgent(action) ) {
+                fsm.popState();
+            }
+        };
+    }
+    
+    private void CreatePerformActionState() {
 
-		performActionState = (fsm, gameObj) => {
-			// perform the action
+        performActionState = (fsm, gameObj) => {
+            // perform the action
 
-			if (!HasActionPlan()) {
-				// no actions to perform
-				Debug.Log("<color=red>Done actions</color>");
-				fsm.popState();
-				fsm.pushState(idleState);
-				dataProvider.ActionsFinished();
-				return;
-			}
+            if (!HasActionPlan()) {
+                // no actions to perform
+                Debug.Log("<color=red>Done actions</color>");
+                fsm.popState();
+                fsm.pushState(idleState);
+                dataProvider.ActionsFinished();
+                return;
+            }
 
-			GoapAction action = currentActions.Peek();
-			if ( action.isDone() ) {
-				// the action is done. Remove it so we can perform the next one
-				currentActions.Dequeue();
-			}
+            GoapAction action = currentActions.Peek();
+            if ( action.isDone() ) {
+                // the action is done. Remove it so we can perform the next one
+                currentActions.Dequeue();
+            }
 
-			if (HasActionPlan()) {
-				// perform the next action
-				action = currentActions.Peek();
-				bool inRange = action.requiresInRange() ? action.isInRange() : true;
+            if (HasActionPlan()) {
+                // perform the next action
+                action = currentActions.Peek();
+                bool inRange = action.requiresInRange() ? action.isInRange() : true;
 
-				if ( inRange ) {
-					// we are in range, so perform the action
-					bool success = action.perform(gameObj);
+                if ( inRange ) {
+                    // we are in range, so perform the action
+                    bool success = action.perform(gameObj);
 
-					if (!success) {
-						// action failed, we need to plan again
-						fsm.popState();
-						fsm.pushState(idleState);
-						dataProvider.PlanAborted(action);
-					}
-				} else {
-					// we need to move there first
-					// push moveTo state
-					fsm.pushState(moveToState);
-				}
+                    if (!success) {
+                        // action failed, we need to plan again
+                        fsm.popState();
+                        fsm.pushState(idleState);
+                        dataProvider.PlanAborted(action);
+                    }
+                } else {
+                    // we need to move there first
+                    // push moveTo state
+                    fsm.pushState(moveToState);
+                }
 
-			} else {
-				// no actions left, move to Plan state
-				fsm.popState();
-				fsm.pushState(idleState);
-				dataProvider.ActionsFinished();
-			}
+            } else {
+                // no actions left, move to Plan state
+                fsm.popState();
+                fsm.pushState(idleState);
+                dataProvider.ActionsFinished();
+            }
 
-		};
-	}
+        };
+    }
 
-	private void FindDataProvider() {
-		foreach (Component comp in gameObject.GetComponents(typeof(Component)) ) {
-			if ( typeof(IGoap).IsAssignableFrom(comp.GetType()) ) {
-				dataProvider = (IGoap)comp;
-				return;
-			}
-		}
-	}
+    private void FindDataProvider() {
+        foreach (Component comp in gameObject.GetComponents(typeof(Component)) ) {
+            if ( typeof(IGoap).IsAssignableFrom(comp.GetType()) ) {
+                dataProvider = (IGoap)comp;
+                return;
+            }
+        }
+    }
 
-	private void LoadActions ()
-	{
-		GoapAction[] actions = gameObject.GetComponents<GoapAction>();
-		foreach (GoapAction a in actions) {
-			availableActions.Add (a);
-		}
-		Debug.Log("Found actions: " + actions);
-	}
+    private void LoadActions ()
+    {
+        GoapAction[] actions = gameObject.GetComponents<GoapAction>();
+        foreach (GoapAction a in actions) {
+            availableActions.Add (a);
+        }
+        Debug.Log("Found actions: " + actions);
+    }
 
-	#region interrupt actions(custom implemenation)
-	// Interrupt current action
+    // === NEW: Interrupt current action ===
     public void InterruptAction() {
         if (currentActions.Count > 0) {
             lastInterruptedAction = currentActions.Peek();  // Store the interrupted action
@@ -197,26 +192,25 @@ public sealed class GoapAgent : MonoBehaviour {
         stateMachine.pushState(idleState); // Move back to Idle state
     }
 
-    //Resume interrupted action
-    public void ResumeAction() 
-	{
-    	if (lastInterruptedAction != null) 
-		{
-    	    if (lastInterruptedAction != null && !lastInterruptedAction.isInterrupted()) { // Ensure the action can be resumed
-    	        Debug.Log("Resuming interrupted action: " + lastInterruptedAction.name);
-    	        currentActions.Enqueue(lastInterruptedAction);  // Re-enqueue the interrupted action
-    	        lastInterruptedAction = null;
-    	        stateMachine.pushState(performActionState); // Resume performing action
-    	    } else {
-    	        Debug.Log("The action cannot be resumed yet.");
-    	    }
-    	}
-	}
-	#endregion
+    // === NEW: Resume interrupted action ===
+    public void ResumeAction() {
+    if (lastInterruptedAction != null) {
+        Debug.Log("Resuming interrupted action: " + lastInterruptedAction.name);
 
-	public IGoap DataProvider()
-	{
-		return dataProvider;
-	}
+        // Check if the action's preconditions are still valid using the gameObject
+        if (lastInterruptedAction.checkProceduralPrecondition(gameObject)) {
+            currentActions.Enqueue(lastInterruptedAction);
+            lastInterruptedAction = null;
+            stateMachine.pushState(performActionState); // Resume performing action
+        } else {
+            Debug.Log("The interrupted action is no longer valid due to world state changes.");
+            stateMachine.pushState(idleState); // Go back to idle state if the action is no longer valid
+        }
+    }
+}
+
+    public IGoap DataProvider() {
+        return dataProvider;
+    }
 
 }

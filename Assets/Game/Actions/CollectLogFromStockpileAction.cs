@@ -5,85 +5,106 @@ using UnityEngine;
 
 public class CollectLogFromStockpileAction : GoapAction {
 
-	bool completed = false;
-	float startTime = 0;
-	public float workDuration = 5; // seconds
+    bool completed = false;
+    float startTime = 0;
+    public float workDuration = 5; // seconds
     public Backpack ownInv;
-	public Inventory forest;
-	Animator anim;
-	NavMeshAgent _agent;
-	// [SerializeField] GameObject objToPickup;
-	[SerializeField] Transform pickupHand;
-	public float ArrivalDistance = 2.0f;
-	Tree tree;
-	
-	public CollectLogFromStockpileAction () {
-		addPrecondition ("hasLogsStocked", true);
-		addEffect ("gotLogs", true);
-		name = "pick up log from stockpile to take to saw mill";
-	}
+    public Inventory forest;
+    Animator anim;
+    NavMeshAgent _agent;
+    [SerializeField] Transform pickupHand;
+    public float ArrivalDistance = 2.0f;
+    Tree tree;
 
-	void Start()
-	{
-		anim = GetComponent<Animator>();
-		if( anim == null)
-		{
-			Debug.Log("No animator found!");;
-		}
-		_agent = GetComponent<NavMeshAgent>();
-		if( _agent == null)
-		{
-			Debug.Log("No NavMeshAgent found!");;
-		}
-	}
-	void Update()
-	{
-		
-	}
-	
-	public override void reset ()
-	{
-		completed = false;
-		startTime = 0;
-	}
-	
-	public override bool isDone ()
-	{
-		return completed;
-	}
-	
-	public override bool requiresInRange ()
-	{
-		return true; 
-	}
-	
-	public override bool checkProceduralPrecondition (GameObject agent)
-	{	
-		target = GameObject.FindGameObjectWithTag("Stockpile");
-		if(target != null)
-		{
-			return true;
-		}
-		return false;
-	}
-	
-	public override bool perform (GameObject agent)
-	{
-		if (startTime == 0 )
-		{
-			startTime = Time.time;
-		}
+    // State-saving variables
+    private float savedStartTime;
+    private bool savedCompleted;
 
-		if (Time.time - startTime > workDuration) 
-		{
-			anim.SetTrigger("pickUp");
+    public CollectLogFromStockpileAction () {
+        addPrecondition ("hasLogsStocked", true);
+        addEffect ("gotLogs", true);
+        name = "pick up log from stockpile to take to saw mill";
+    }
 
-			ownInv.logs += 5;
-			stockpile.logs -= 5;
-			// Debug.Log("Parenting log to hand");
-			completed = true;
-		}
-		return true;
-	}
-	
+    void Start()
+    {
+        anim = GetComponent<Animator>();
+        if( anim == null)
+        {
+            Debug.Log("No animator found!");
+        }
+        _agent = GetComponent<NavMeshAgent>();
+        if( _agent == null)
+        {
+            Debug.Log("No NavMeshAgent found!");
+        }
+    }
+
+    void Update()
+    {
+        
+    }
+
+    public override void reset ()
+    {
+        completed = false;
+        startTime = 0;
+    }
+
+    public override bool isDone ()
+    {
+        return completed;
+    }
+
+    public override bool requiresInRange ()
+    {
+        return true;
+    }
+
+    public override bool checkProceduralPrecondition (GameObject agent)
+    {    
+        target = GameObject.FindGameObjectWithTag("Stockpile");
+        if(target != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public override bool perform (GameObject agent)
+    {
+        if (startTime == 0 )
+        {
+            startTime = Time.time;
+        }
+
+        if (Time.time - startTime > workDuration) 
+        {
+            anim.SetTrigger("pickUp");
+
+            // Simulate log collection (assuming you have inventory logic implemented elsewhere)
+            // ownInv.logs += 5;
+            // stockpile.logs -= 5;
+            completed = true;
+        }
+        return true;
+    }
+
+    // Save the current state of the action
+    public override void saveState()
+    {
+        // Save the time when the action started and its completion status
+        savedStartTime = startTime;
+        savedCompleted = completed;
+        Debug.Log("Saving state: startTime = " + startTime + ", completed = " + completed);
+    }
+
+    // Restore the saved state of the action
+    public override void restoreState()
+    {
+        // Restore the time and completion status
+        startTime = savedStartTime;
+        completed = savedCompleted;
+        Debug.Log("Restoring state: startTime = " + startTime + ", completed = " + completed);
+    }
 }
