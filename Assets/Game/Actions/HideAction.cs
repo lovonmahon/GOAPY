@@ -2,6 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using RiseReign;
+using UnityEditor.Build.Reporting;
+
+
+/// <summary>
+/// While Cutting trees....
+// EXAMPLE:
+//Bear appears → hide = true
+//World state: isSafe = false
+//Planner includes HideAction
+//Agent executes HideAction
+//Bear leaves → hide = false
+//World state: isSafe = true
+//HideAction completes
+//Agent replans to work
+/// </summary>
 
 public class HideAction : GoapAction {
 
@@ -17,10 +32,10 @@ public class HideAction : GoapAction {
         sight = gameObject.GetComponent<Sight>();        
     }
     
-    public HideAction(){
-		// addPrecondition("canSeePlayer", false);
-		// addEffect ("Hide", true);
-		addEffect ("doJob", true);
+    public HideAction()
+	{
+		addPrecondition("isSafe", false);//This tells the planner: “Only consider HideAction when I am not safe.”
+		addEffect ("isSafe", true); //"what the world is expected to look like after the action completes successfully"
     	name = "Find a place to hide";
 	}
 
@@ -33,35 +48,39 @@ public class HideAction : GoapAction {
 		target = null;
 	}
 
-	public override bool isDone(){
-		return m_sawPlayer;
+	public override bool isDone() // Am I finished forever?
+	{
+	    // Done when no longer in danger
+        return !GetComponent<Worker>().GetNeedsToHide();
 	}
 
-	public override bool requiresInRange(){
+
+	public override bool requiresInRange()
+	{
 		return true;
 	}
 
 	public override bool checkProceduralPrecondition(GameObject agent)
 	{
-		if( sight.isInFOV == true || GetComponent<Worker>().GetNeedsToHide())
-		{
-			target = GameObject.FindGameObjectWithTag("HidingSpot");
-			if (target != null)
-			{
-				Debug.Log("I found a hiding spot!");
-				return true;
-			}
-		}	
-		return false;
-	}
-
-	public override bool perform(GameObject agent)
-	{
-		if(m_sawPlayer)
+		if (GetComponent<Worker>().GetNeedsToHide())
         {
-            Debug.Log("Hiding!");	
-	        return true;
+            target = GameObject.FindGameObjectWithTag("HidingSpot");
+            return target != null;
         }
         return false;
+	}
+
+	/// <summary>
+	/// 👉 Because perform() is called every frame until isDone() returns true.
+	///Returning true does not mean “done”.
+	/// It means “I’m still executing successfully.
+	/// </summary>
+	/// <param name="agent"></param>
+	/// <returns></returns>
+
+	public override bool perform(GameObject agent)  // Am I still valid this frame?
+	{
+		// Stay hiding until safe
+        return true;
 	}
 }

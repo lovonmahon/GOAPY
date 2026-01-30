@@ -66,6 +66,9 @@ public class CutTreeAction : GoapAction {
 	
 	public override bool perform (GameObject agent)
 	{
+		// INTERRUPTION → fail action → agent replans
+		if (isInterrupted()) return false;
+		
 		anim.SetTrigger("cutTree");
 		if (startTime == 0 )
 		{

@@ -21,14 +21,14 @@ public class Builder : Worker
     }
 
     void UpdateAnimator()
-        {
-            //First get global velocity on navmesh agent
-            Vector3 velocity = GetComponent<NavMeshAgent>().velocity;
-            //convert to local velocity
-            Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-            //Which direction of interest for movement
-            float speed = localVelocity.z;
-            //Influence the float parameter on the animator by feding it the speed values from the local velocity.
-            GetComponent<Animator>().SetFloat("forwardSpeed", speed);
-        }
+    {
+        //First get global velocity on navmesh agent
+        Vector3 velocity = GetComponent<NavMeshAgent>().velocity;
+        //convert to local velocity
+        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        //Which direction of interest for movement
+        float speed = localVelocity.z;
+        //Influence the float parameter on the animator by feding it the speed values from the local velocity.
+        GetComponent<Animator>().SetFloat("forwardSpeed", speed);
+    }
 }

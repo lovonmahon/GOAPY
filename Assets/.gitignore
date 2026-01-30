@@ -1,0 +1,4 @@
+*.log
+.unity
+.meta
+.vscode

@@ -1,73 +1,85 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/**
+ * Base class for all GOAP actions.
+ * Supports clean interruption and forced replanning.
+ */
 public abstract class GoapAction : MonoBehaviour {
 
-    public string name = "No Name";
-    private HashSet<KeyValuePair<string,object>> preconditions;
-    private HashSet<KeyValuePair<string,object>> effects;
+    public string actionName = "No Name";
 
-    private bool inRange = false;
+    protected HashSet<KeyValuePair<string,object>> preconditions;
+    protected HashSet<KeyValuePair<string,object>> effects;
 
-    /* The cost of performing the action. 
-     * Figure out a weight that suits the action. 
-     * Changing it will affect what actions are chosen during planning.*/
+    protected bool inRange = false;
+
+    /* Cost used by planner */
     public float cost = 1f;
 
-    /**
-     * An action often has to perform on an object. This is that object. Can be null. */
+    /* Target of the action */
     public GameObject target;
 
-    // New variables to manage interruptions
-    private bool interrupted = false; // Whether the action was interrupted
-    private bool isResumed = false; // Whether the action is resumed after interruption
+    /* Interruption flag */
+    protected bool interrupted = false;
+
 
     public GoapAction() {
-        preconditions = new HashSet<KeyValuePair<string, object>> ();
-        effects = new HashSet<KeyValuePair<string, object>> ();
+        preconditions = new HashSet<KeyValuePair<string, object>>();
+        effects = new HashSet<KeyValuePair<string, object>>();
     }
 
-    public void doReset() {
+    /* ============================================================
+     * RESET / LIFECYCLE
+     * ============================================================
+     */
+
+    // Called before every new planning run
+    public virtual void doReset() {
+
+        // Clear movement state
         inRange = false;
         target = null;
-        reset ();
+
+        // Clear interruption state
+        interrupted = false;
+
+        // Let derived action reset itself
+        reset();
     }
 
     /**
-     * Reset any variables that need to be reset before planning happens again.
+     * Reset custom variables in derived actions
      */
     public abstract void reset();
 
     /**
-     * Is the action done?
+     * Is this action finished?
      */
     public abstract bool isDone();
 
     /**
-     * Procedurally check if this action can run. Not all actions
-     * will need this, but some might.
+     * Check if this action can run in current world state
      */
     public abstract bool checkProceduralPrecondition(GameObject agent);
 
     /**
-     * Run the action.
-     * Returns True if the action performed successfully or false
-     * if something happened and it can no longer perform. In this case
-     * the action queue should clear out and the goal cannot be reached.
+     * Perform action.
+     * Return false = action failed → abort plan
      */
     public abstract bool perform(GameObject agent);
 
     /**
-     * Does this action need to be within range of a target game object?
-     * If not then the moveTo state will not need to run for this action.
+     * Does this action require being in range?
      */
     public abstract bool requiresInRange ();
-    
 
-    /**
-     * Are we in range of the target?
-     * The MoveTo state will set this and it gets reset each time this action is performed.
+
+    /* ============================================================
+     * RANGE CONTROL
+     * ============================================================
      */
+
     public bool isInRange () {
         return inRange;
     }
@@ -77,58 +89,51 @@ public abstract class GoapAction : MonoBehaviour {
     }
 
 
-    // Highlighted Change: Interrupt handling methods
+    /* ============================================================
+     * INTERRUPTION
+     * ============================================================
+     */
 
-    // Method to call when the action is interrupted
-    public void interrupt() {
+    /**
+     * Force this action to fail and trigger replanning.
+     */
+    public virtual void interrupt() {
+
+        // Mark as invalid
         interrupted = true;
-        saveState();  // Save the state on interruption
-        Debug.Log(name + " was interrupted.");
+
+        Debug.Log(actionName + " was interrupted.");
     }
 
-    // Method to check if the action is interrupted
+    /**
+     * Has this action been interrupted?
+     */
     public bool isInterrupted() {
         return interrupted;
     }
 
-    // Method to resume the action if it was interrupted
-    public void resumeAction() {
-        if (interrupted) {
-            interrupted = false;
-            isResumed = true;
-            Debug.Log(name + " is resumed.");
-            restoreState();  // Restore the state after resumption
-        }
-    }
 
-    // Check if the action has been resumed after interruption
-    public bool isResumedAfterInterrupt() {
-        return isResumed;
-    }
-
-    // New method to save action state before interruption
-    public virtual void saveState() {
-        // Save any relevant state here, e.g., target position, progress, etc.
-        // Example: save position, target, or any progress data needed for resumption.
-    }
-
-    // New method to restore the saved state when the action is resumed
-    public virtual void restoreState() {
-        // Restore the saved state here
-        // Example: restore position, progress, target, etc. from the saved state.
-    }
+    /* ============================================================
+     * PRECONDITIONS / EFFECTS
+     * ============================================================
+     */
 
     public void addPrecondition(string key, object value) {
         preconditions.Add(new KeyValuePair<string, object>(key, value));
     }
 
     public void removePrecondition(string key) {
-        KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
+
+        KeyValuePair<string, object> remove = default;
+
         foreach (KeyValuePair<string, object> kvp in preconditions) {
-            if (kvp.Key.Equals(key)) 
+            if (kvp.Key.Equals(key)) {
                 remove = kvp;
+                break;
+            }
         }
-        if (!default(KeyValuePair<string,object>).Equals(remove))
+
+        if (!remove.Equals(default(KeyValuePair<string,object>)))
             preconditions.Remove(remove);
     }
 
@@ -137,24 +142,25 @@ public abstract class GoapAction : MonoBehaviour {
     }
 
     public void removeEffect(string key) {
-        KeyValuePair<string, object> remove = default(KeyValuePair<string,object>);
+
+        KeyValuePair<string, object> remove = default;
+
         foreach (KeyValuePair<string, object> kvp in effects) {
-            if (kvp.Key.Equals(key)) 
+            if (kvp.Key.Equals(key)) {
                 remove = kvp;
+                break;
+            }
         }
-        if (!default(KeyValuePair<string,object>).Equals(remove))
+
+        if (!remove.Equals(default(KeyValuePair<string,object>)))
             effects.Remove(remove);
     }
 
     public HashSet<KeyValuePair<string, object>> Preconditions {
-        get {
-            return preconditions;
-        }
+        get { return preconditions; }
     }
 
     public HashSet<KeyValuePair<string, object>> Effects {
-        get {
-            return effects;
-        }
+        get { return effects; }
     }
 }

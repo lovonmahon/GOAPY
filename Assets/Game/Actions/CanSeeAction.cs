@@ -59,22 +59,30 @@ public class CanSeeAction : GoapAction {
 		return false;
 	}
 
+	
 	public override bool perform(GameObject agent)
 	{
-		 // Only perform the action if the player is visible
-    	if (!m_sawPlayer && sight.isInFOV)
-    	{
-    	    m_sawPlayer = true;
-    	    Debug.Log("Ah ketch eem!");    
+	    ///<Summary>
+		/// 
+		/// Rule to follow
 
-    	    // Interrupt the current action if agent sees the player
-    	    GoapAgent goapAgent = agent.GetComponent<GoapAgent>();
-    	    if (goapAgent != null) 
-    	    {
-    	        goapAgent.InterruptAction(); // Interrupt current action and replan
-    	    }
-    	}
+		// Actions interrupt actions
+		// Agent handles replanning
+		// Actions do NOT call GoapAgent.InterruptAction()
 
-    	return m_sawPlayer;
+		///</Summary>
+		if (sight.isInFOV)
+	    {
+	        Debug.Log("Bear spotted!");
+
+	        // Mark THIS action as done
+	        m_sawPlayer = true;
+
+	        // FAIL the plan → agent will replan
+	        return false;
+	    }
+
+	    return true;
 	}
+
 }
