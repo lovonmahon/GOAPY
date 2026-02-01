@@ -12,12 +12,14 @@ public abstract class Worker : MonoBehaviour, IGoap
 	//Base class for all AI types
 	NavMeshAgent agent;
 	Vector3 previousDestination;
-	// Inventory inv;
+	
 	[Tooltip("Stockpile")]
 	public Inventory stockpile;
-	public Inventory lumbermill;
+	public Inventory windmill;
+	// public Inventory lumbermill;
 	public Backpack ownInv;
-	public Inventory forest;
+	Inventory inv;
+	// public Inventory forest;
 	public bool close = false;
 	bool hide = false;
 	public float moveSpeed = 1.5f;
@@ -56,14 +58,19 @@ public abstract class Worker : MonoBehaviour, IGoap
 		worldData.Add(new KeyValuePair<string, object>("isSafe", !hide));
 		
 		worldData.Add(new KeyValuePair<string, object>("canSeePlayer", false ));
-		worldData.Add(new KeyValuePair<string, object>("hasStock", (stockpile.flourLevel > 4) ));
+		worldData.Add(new KeyValuePair<string, object>("hasWheat", (stockpile.wheatLevel > 4) ));
+
+		worldData.Add(new KeyValuePair<string, object>("hasFlourStock", (windmill.flourLevel > 4) ));
 		worldData.Add(new KeyValuePair<string, object>("hasFlour", (ownInv.flourLevel > 1) ));
-		worldData.Add(new KeyValuePair<string, object>("hasDelivery", (ownInv.breadLevel > 4) ));
+
+		worldData.Add(new KeyValuePair<string, object>("hasBread", (ownInv.breadLevel > 4) ));
+		worldData.Add(new KeyValuePair<string, object>("hasBreadInStockpile", (stockpile.breadLevel > 4) ));
+		
 		// worldData.Add(new KeyValuePair<string, object>("hasTrees", (stockpile.trees > 1) ));
 		// worldData.Add(new KeyValuePair<string, object>("hasLogs", (inv.trees > 0) ));
 		
 		//Wood Cutter
-		worldData.Add(new KeyValuePair<string, object>("hasTrees", (forest.logs > 4) ));
+		// worldData.Add(new KeyValuePair<string, object>("hasTrees", (forest.logs > 4) ));
 		worldData.Add(new KeyValuePair<string, object>("hasLogs", (ownInv.logs > 4) ));
 		worldData.Add(new KeyValuePair<string, object>("hasLogsDelivery", (ownInv.logsToDeliver > 4) ));
 
@@ -71,7 +78,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 		worldData.Add(new KeyValuePair<string, object>("hasLogsStocked", (stockpile.logs > 4) ));
 
 		//Builder
-		worldData.Add(new KeyValuePair<string, object>("hasLumber", (lumbermill.lumber > 4) ));
+		// worldData.Add(new KeyValuePair<string, object>("hasLumber", (lumbermill.lumber > 4) ));
 		worldData.Add(new KeyValuePair<string, object>("hasTools", (stockpile.tools > 1) ));
 
 		//Toolsmith needs Iron ore to make tools

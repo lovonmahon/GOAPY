@@ -7,7 +7,7 @@ using System.Collections.Generic;
  */
 public abstract class GoapAction : MonoBehaviour {
 
-    public string actionName = "No Name";
+    public string ActionName { get; protected set; }
 
     protected HashSet<KeyValuePair<string,object>> preconditions;
     protected HashSet<KeyValuePair<string,object>> effects;
@@ -60,6 +60,7 @@ public abstract class GoapAction : MonoBehaviour {
 
     /**
      * Check if this action can run in current world state
+     *checkProceduralPrecondition is where an action verifies it can run on this agent, right now, using runtime data that the planner cannot know.
      */
     public abstract bool checkProceduralPrecondition(GameObject agent);
 
@@ -102,7 +103,7 @@ public abstract class GoapAction : MonoBehaviour {
         // Mark as invalid
         interrupted = true;
 
-        Debug.Log(actionName + " was interrupted.");
+        Debug.Log(ActionName + " was interrupted.");
     }
 
     /**

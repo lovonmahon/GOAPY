@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour {
 
+	public int wheatLevel = 5;
 	public int flourLevel = 5;
 	public int breadLevel = 0;
 	public int logs = 0;

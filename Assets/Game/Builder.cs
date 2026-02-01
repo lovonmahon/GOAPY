@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine;
 
-public class Builder : Worker
+public sealed class Builder : Worker
 {
     //Builder builds/repairs infrastructure
    public override HashSet<KeyValuePair<string,object>> CreateGoalState ()

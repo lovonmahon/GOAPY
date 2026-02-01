@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine;
 
-public class Transporter : Worker
+public sealed class Transporter : Worker
 {
     //Transporter carries specific resources(bundles) from stockpile to their destination
     //so other workers can use them

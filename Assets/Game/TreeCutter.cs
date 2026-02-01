@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine;
 
-public class TreeCutter : Worker
+public sealed class TreeCutter : Worker
 {
     // Start is called before the first frame update
    public override HashSet<KeyValuePair<string,object>> CreateGoalState ()

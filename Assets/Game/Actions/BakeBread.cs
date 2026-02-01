@@ -1,64 +1,71 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class BakeBread : GoapAction {
+public class BakeBread : GoapAction
+{
+    bool completed = false;
+    float startTime = 0f;
+    public float workDuration = 2f; // seconds
 
-	bool completed = false;
-	float startTime = 0;
-	public float workDuration = 2; // seconds
-	
-	public BakeBread () {
-		addPrecondition ("hasFlour", true); 
-		addEffect ("doJob", true);
-		name = "BakeBread";
-	}
-	
-	public override void reset ()
-	{
-		completed = false;
-		startTime = 0;
-	}
-	
-	public override bool isDone ()
-	{
-		return completed;
-	}
-	
-	public override bool requiresInRange ()
-	{
-		return true; 
-	}
-	
-	public override bool checkProceduralPrecondition (GameObject agent)
-	{	
-		if(!GetComponent<Worker>().interrupt)	
-		{
-			target = GameObject.FindGameObjectWithTag("Bakery");
-			if(target != null)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public override bool perform (GameObject agent)
-	{
-		if (startTime == 0)
-		{
-			Debug.Log("Starting: " + name);
-			startTime = Time.time;
-		}
+    Worker worker;
 
-		if (Time.time - startTime > workDuration) 
-		{
-			Debug.Log("Finished: " + name);
-			this.GetComponent<Inventory>().flourLevel -= 2;
-			this.GetComponent<Inventory>().breadLevel += 1;
-			completed = true;
-		}
-		return true;
-	}
-	
+    public BakeBread()
+    {
+        // Planner-facing logic
+        addPrecondition("hasFlour", true);
+        addEffect("hasBread", true);
+    }
+    void Awake()
+    {
+        ActionName = "Bake Bread";
+    }
+
+    public override void reset()
+    {
+        completed = false;
+        startTime = 0f;
+    }
+
+    public override bool isDone()
+    {
+        return completed;
+    }
+
+    public override bool requiresInRange()
+    {
+        return true;
+    }
+
+    public override bool checkProceduralPrecondition(GameObject agent)
+    {
+        worker = agent.GetComponent<Worker>();
+
+        target = GameObject.FindGameObjectWithTag("Bakery");
+        return target != null;
+    }
+
+    public override bool perform(GameObject agent)
+    {
+        // Abort if danger appears
+        if (isInterrupted() || worker.GetNeedsToHide())
+            return false;
+
+        if (startTime == 0f)
+        {
+            Debug.Log("Starting: " + ActionName);
+            startTime = Time.time;
+        }
+
+        if (Time.time - startTime > workDuration)
+        {
+            Debug.Log("Finished: " + ActionName);
+
+            Backpack inv = agent.GetComponent<Backpack>();
+            inv.flourLevel -= 2;
+            inv.breadLevel += 1;
+
+            completed = true;
+        }
+
+        return true;
+    }
 }

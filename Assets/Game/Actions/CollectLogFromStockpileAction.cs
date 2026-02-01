@@ -90,21 +90,5 @@ public class CollectLogFromStockpileAction : GoapAction {
         return true;
     }
 
-    // Save the current state of the action
-    public override void saveState()
-    {
-        // Save the time when the action started and its completion status
-        savedStartTime = startTime;
-        savedCompleted = completed;
-        Debug.Log("Saving state: startTime = " + startTime + ", completed = " + completed);
-    }
-
-    // Restore the saved state of the action
-    public override void restoreState()
-    {
-        // Restore the time and completion status
-        startTime = savedStartTime;
-        completed = savedCompleted;
-        Debug.Log("Restoring state: startTime = " + startTime + ", completed = " + completed);
-    }
+   
 }

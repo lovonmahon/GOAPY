@@ -7,14 +7,24 @@ public class DeliverBread : GoapAction {
 	bool completed = false;
 	float startTime = 0;
 	public float workDuration = 2; // seconds
+	Worker worker;
+	public Inventory marketInventory;
 	
-	public DeliverBread () {
-		addPrecondition ("hasDelivery", true); 
-		addEffect ("doJob", true);
-		name = "DeliverBread";
+	public DeliverBread () 
+	{
+		// Planner-facing logic
+        addPrecondition("hasBread", true);
+
+        // After delivery, the agent no longer has bread
+        addEffect("hasBread", false);
+        addEffect("hasBreadInStockpile", true);
 	}
-	
-	public override void reset ()
+    void Awake()
+    {
+        ActionName = "Deliver Bread";
+    }
+
+    public override void reset ()
 	{
 		completed = false;
 		startTime = 0;
@@ -32,21 +42,32 @@ public class DeliverBread : GoapAction {
 	
 	public override bool checkProceduralPrecondition (GameObject agent)
 	{	
-		return true;
+		worker = agent.GetComponent<Worker>();
+
+        target = GameObject.FindGameObjectWithTag("Stockpile");
+        return target != null;
 	}
 	
 	public override bool perform (GameObject agent)
 	{
+		// Abort if danger appears
+        if (isInterrupted() || worker.GetNeedsToHide())
+		{
+			return false;
+		}
+            
 		if (startTime == 0)
 		{
-			Debug.Log("Starting: " + name);
+			Debug.Log("Starting: " + ActionName);
 			startTime = Time.time;
 		}
 
 		if (Time.time - startTime > workDuration) 
 		{
-			Debug.Log("Finished: " + name);
-			this.GetComponent<Inventory>().breadLevel -= 5;
+			Debug.Log("Finished: " + ActionName);
+			agent.GetComponent<Backpack>().breadLevel -= 5;
+			marketInventory.breadLevel += 5;
+
 			completed = true;
 		}
 		return true;
