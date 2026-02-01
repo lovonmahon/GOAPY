@@ -160,7 +160,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!23 &164480800
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -243,7 +243,7 @@ GameObject:
   - component: {fileID: 351078546}
   m_Layer: 0
   m_Name: Wheat Field
-  m_TagString: Untagged
+  m_TagString: WheatField
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -338,7 +338,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!4 &519234164 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 5862bbfe91a75054ca72c13b555b6ac5, type: 3}
@@ -475,7 +475,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!1001 &613394266
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -663,7 +663,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!1001 &640016122
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -758,7 +758,6 @@ GameObject:
   - component: {fileID: 743796553}
   - component: {fileID: 743796552}
   - component: {fileID: 743796551}
-  - component: {fileID: 743796550}
   - component: {fileID: 743796549}
   - component: {fileID: 743796554}
   - component: {fileID: 743796555}
@@ -895,28 +894,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 174da94aa1a529f439411f16a4bc59bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionName: Pick up flour
   cost: 1
   target: {fileID: 1279486380}
   workDuration: 2
   windmill: {fileID: 1279486385}
---- !u!114 &743796550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 743796543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f4a67b0e71b47541bd3351b96773244, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  actionName: Deliver Wheat
-  cost: 1
-  target: {fileID: 1279486380}
-  workDuration: 2
-  windmillInv: {fileID: 1279486385}
 --- !u!114 &743796551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -929,11 +910,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f14a2af987a554db7033c2084976bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionName: Deliver Bread
   cost: 1
   target: {fileID: 637827608}
   workDuration: 2
-  marketInventory: {fileID: 0}
+  marketInventory: {fileID: 637827613}
 --- !u!114 &743796552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -946,7 +926,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 753c5451f5a212f4a9be807a0499bf37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionName: Bake Bread
   cost: 1
   target: {fileID: 540438561}
   workDuration: 2
@@ -964,6 +943,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stockpile: {fileID: 164480799}
   windmill: {fileID: 1279486385}
+  wheatField: {fileID: 351078546}
   ownInv: {fileID: 743796554}
   close: 0
   moveSpeed: 1.5
@@ -979,13 +959,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ed33cc63d953d147bd82f1a74368714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flourLevel: 5
-  breadLevel: 0
-  wheatLevel: 0
-  logs: 0
-  logsToDeliver: 0
-  buildingSupplies: 0
-  tools: 0
+  drawOffset: 0
+  inventoryName: Agent's Inventory
 --- !u!114 &743796555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1119,6 +1094,237 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &832067425
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 832067433}
+  - component: {fileID: 832067432}
+  - component: {fileID: 832067431}
+  - component: {fileID: 832067430}
+  - component: {fileID: 832067429}
+  - component: {fileID: 832067428}
+  - component: {fileID: 832067427}
+  - component: {fileID: 832067426}
+  - component: {fileID: 832067434}
+  - component: {fileID: 832067436}
+  - component: {fileID: 832067435}
+  m_Layer: 0
+  m_Name: Windmill Worker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &832067426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd6d0fa7030f6bb43905bc2808237c90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &832067427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ed33cc63d953d147bd82f1a74368714, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawOffset: 0
+  inventoryName: Agent's Inventory
+--- !u!114 &832067428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f4a67b0e71b47541bd3351b96773244, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cost: 1
+  target: {fileID: 1279486380}
+  workDuration: 2
+  windmillInv: {fileID: 1279486385}
+--- !u!195 &832067429
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!23 &832067430
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: fed4e78bda2b3de45954637fee164b8c, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &832067431
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &832067432
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &832067433
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 34.76, y: 1.71, z: 7.2}
+  m_LocalScale: {x: 1.4566561, y: 1.4566566, z: 1.4566566}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2024757156}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &832067434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6134c01d817405c4ead4494d89762655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cost: 1
+  target: {fileID: 351078542}
+  workDuration: 2
+  wheatField: {fileID: 351078546}
+--- !u!114 &832067435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf90c1b3b7423344e93b47db441708b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stockpile: {fileID: 164480799}
+  windmill: {fileID: 1279486385}
+  wheatField: {fileID: 351078546}
+  ownInv: {fileID: 832067427}
+  close: 0
+  moveSpeed: 1.5
+--- !u!114 &832067436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832067425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d7700dc8aee15c448c67bd7eebfa7f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cost: 1
+  target: {fileID: 1279486380}
+  workDuration: 3
 --- !u!1001 &972845614
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1316,7 +1522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02c244399c99db449869277ae3b79b3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wheatLevel: 5
+  wheatLevel: 0
   flourLevel: 5
   breadLevel: 0
   logs: 0
@@ -1326,7 +1532,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!1001 &1302569298
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1454,7 +1660,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: b5eecf9d16b17a74c9a38ff50bf2bd45, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1605,7 +1811,7 @@ MonoBehaviour:
   lumber: 0
   ironOre: 0
   drawOffset: 0
-  name: 
+  inventoryName: Inventory
 --- !u!1 &1772510334
 GameObject:
   m_ObjectHideFlags: 0
@@ -1967,6 +2173,116 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 5862bbfe91a75054ca72c13b555b6ac5, type: 3}
   m_PrefabInstance: {fileID: 2009550856}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2024757155
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2024757156}
+  - component: {fileID: 2024757159}
+  - component: {fileID: 2024757158}
+  - component: {fileID: 2024757157}
+  m_Layer: 0
+  m_Name: Cylinder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2024757156
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024757155}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.02, z: 0}
+  m_LocalScale: {x: 0.8258579, y: 0.27970445, z: 0.8258579}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 832067433}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2024757157
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024757155}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 11cef98c79d307640a4592cda23188cd, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &2024757158
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024757155}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &2024757159
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024757155}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1978,5 +2294,6 @@ SceneRoots:
   - {fileID: 1770384754}
   - {fileID: 972845614}
   - {fileID: 743796547}
+  - {fileID: 832067433}
   - {fileID: 351078545}
   - {fileID: 164480802}

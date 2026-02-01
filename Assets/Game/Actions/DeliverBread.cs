@@ -15,7 +15,6 @@ public class DeliverBread : GoapAction {
 		// Planner-facing logic
         addPrecondition("hasBread", true);
 
-        // After delivery, the agent no longer has bread
         addEffect("hasBread", false);
         addEffect("hasBreadInStockpile", true);
 	}
@@ -44,8 +43,11 @@ public class DeliverBread : GoapAction {
 	{	
 		worker = agent.GetComponent<Worker>();
 
-        target = GameObject.FindGameObjectWithTag("Stockpile");
-        return target != null;
+        target = GameObject.FindGameObjectWithTag("Market");
+        if (target == null) return false;
+
+        marketInventory = target.GetComponent<Inventory>();
+        return marketInventory != null;
 	}
 	
 	public override bool perform (GameObject agent)
@@ -56,6 +58,10 @@ public class DeliverBread : GoapAction {
 			return false;
 		}
             
+		Backpack inv = agent.GetComponent<Backpack>();
+        if (inv.breadLevel < 5)
+            return false;
+		
 		if (startTime == 0)
 		{
 			Debug.Log("Starting: " + ActionName);
@@ -65,8 +71,9 @@ public class DeliverBread : GoapAction {
 		if (Time.time - startTime > workDuration) 
 		{
 			Debug.Log("Finished: " + ActionName);
-			agent.GetComponent<Backpack>().breadLevel -= 5;
-			marketInventory.breadLevel += 5;
+			
+			inv.breadLevel -= 5;
+            marketInventory.breadLevel += 5;
 
 			completed = true;
 		}

@@ -12,15 +12,14 @@ public class PickupFlour : GoapAction
     public PickupFlour()
     {
         // Planner-facing logic
-        addPrecondition("hasFlour", false);// agent doesn not have flours but...
-		addPrecondition("hasFlourStock", true); // ...the windmill has some.  Go pick some up
+        addPrecondition("hasFlour", false);
+        addPrecondition("hasFlourAtMill", true);
 
         addEffect("hasFlour", true);
-		addEffect("hasFlourStock", false); // stock reduced / may be empty
     }
     void Awake()
     {
-        ActionName = "Pickup Flour";
+        ActionName = "Pickup Flour From Mill";
     }
 
     public override void reset()
@@ -45,13 +44,19 @@ public class PickupFlour : GoapAction
         worker = agent.GetComponent<Worker>();
 
         target = GameObject.FindGameObjectWithTag("Windmill");
-        return target != null;
+        if (target == null) return false;
+
+        windmill = target.GetComponent<Inventory>();
+        return windmill != null && windmill.flourLevel > 0;
     }
 
     public override bool perform(GameObject agent)
     {
         // Abort if danger appears
         if (isInterrupted() || worker.GetNeedsToHide())
+            return false;
+
+        if (windmill.flourLevel < 5)
             return false;
 
         if (startTime == 0f)

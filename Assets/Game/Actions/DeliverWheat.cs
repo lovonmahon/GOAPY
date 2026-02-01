@@ -14,12 +14,11 @@ public class DeliverWheat : GoapAction {
 		// After delivery, agent no longer has wheat
 		addEffect ("hasWheat", false);
 
-		// World can now produce / has flour stock
-        addEffect("hasFlourStock", true);
+		// World can now produce flour since wheat has been dropped off
 	}
     void Awake()
     {
-        ActionName = "Deliver Wheat";
+        ActionName = "Deliver Wheat To Mill";
     }
 
     public override void reset ()
@@ -43,8 +42,11 @@ public class DeliverWheat : GoapAction {
 	{	
 		worker = agent.GetComponent<Worker>();
 
-        target = GameObject.FindGameObjectWithTag("Windmill");
-        return target != null;
+		target = GameObject.FindGameObjectWithTag("Windmill");
+        if (target == null) return false;
+
+        windmillInv = target.GetComponent<Inventory>();
+        return windmillInv != null;
 	}
 	
 	public override bool perform (GameObject agent)
@@ -63,12 +65,11 @@ public class DeliverWheat : GoapAction {
 
 		if (Time.time - startTime > workDuration) 
 		{
-			Backpack agentInv = agent.GetComponent<Backpack>();
+			Backpack inv = agent.GetComponent<Backpack>();
 
-			Debug.Log("Finished: " + ActionName);
-			agentInv.wheatLevel -= 5;
-			windmillInv.wheatLevel += 5;
-			completed = true;
+            Debug.Log("Finished: " + ActionName);
+            inv.wheatLevel -= 5;
+            windmillInv.wheatLevel += 5;
 		}
 		return true;
 	}

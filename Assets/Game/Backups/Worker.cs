@@ -16,7 +16,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 	[Tooltip("Stockpile")]
 	public Inventory stockpile;
 	public Inventory windmill;
-	// public Inventory lumbermill;
+	public Inventory wheatField;
 	public Backpack ownInv;
 	Inventory inv;
 	// public Inventory forest;
@@ -55,41 +55,30 @@ public abstract class Worker : MonoBehaviour, IGoap
 		HashSet<KeyValuePair<string,object>> worldData = new HashSet<KeyValuePair<string,object>> ();
 		// Danger / safety state (for GOAP interrupt handling)
 		worldData.Add(new KeyValuePair<string, object>("enemyVisible", hide));
-		worldData.Add(new KeyValuePair<string, object>("isSafe", !hide));
-		
+		worldData.Add(new KeyValuePair<string, object>("isSafe", !hide));		
 		worldData.Add(new KeyValuePair<string, object>("canSeePlayer", false ));
-		worldData.Add(new KeyValuePair<string, object>("hasWheat", (stockpile.wheatLevel > 4) ));
 
-		worldData.Add(new KeyValuePair<string, object>("hasFlourStock", (windmill.flourLevel > 4) ));
-		worldData.Add(new KeyValuePair<string, object>("hasFlour", (ownInv.flourLevel > 1) ));
+		// ===== FOOD PIPELINE (CORRECT & ROLE-SAFE) =====
 
-		worldData.Add(new KeyValuePair<string, object>("hasBread", (ownInv.breadLevel > 4) ));
-		worldData.Add(new KeyValuePair<string, object>("hasBreadInStockpile", (stockpile.breadLevel > 4) ));
-		
-		// worldData.Add(new KeyValuePair<string, object>("hasTrees", (stockpile.trees > 1) ));
-		// worldData.Add(new KeyValuePair<string, object>("hasLogs", (inv.trees > 0) ));
-		
-		//Wood Cutter
-		// worldData.Add(new KeyValuePair<string, object>("hasTrees", (forest.logs > 4) ));
-		worldData.Add(new KeyValuePair<string, object>("hasLogs", (ownInv.logs > 4) ));
-		worldData.Add(new KeyValuePair<string, object>("hasLogsDelivery", (ownInv.logsToDeliver > 4) ));
+		// Wheat exists in the world (for Miller)
+		worldData.Add(new KeyValuePair<string, object>("fieldHasWheat", wheatField.wheatLevel > 0));
 
-		//Saw mill
-		worldData.Add(new KeyValuePair<string, object>("hasLogsStocked", (stockpile.logs > 4) ));
-
-		//Builder
-		// worldData.Add(new KeyValuePair<string, object>("hasLumber", (lumbermill.lumber > 4) ));
-		worldData.Add(new KeyValuePair<string, object>("hasTools", (stockpile.tools > 1) ));
-
-		//Toolsmith needs Iron ore to make tools
-		worldData.Add(new KeyValuePair<string, object>("hasIronOre", (stockpile.ironOre > 4) ));
-		
-		//Iron ore miner  (also will need pick axe to mine - toolsmith supplies axes)
-		worldData.Add(new KeyValuePair<string, object>("hasIronOreInMine", true ));
+		// Miller backpack
+		worldData.Add(new KeyValuePair<string, object>("hasWheat", ownInv.wheatLevel > 0));
+		worldData.Add(new KeyValuePair<string, object>("hasWheatAtMill", windmill.wheatLevel > 0));
 
 
-		//Hiding		
-		// worldData.Add(new KeyValuePair<string, object>("Hide", false ));
+		// Flour exists at the mill (Miller goal, Baker dependency)
+		worldData.Add(new KeyValuePair<string, object>("hasFlourAtMill", windmill.flourLevel > 0));
+
+		// Baker backpack
+		worldData.Add(new KeyValuePair<string, object>("hasFlour", ownInv.flourLevel > 0));
+
+		// Baker backpack
+		worldData.Add(new KeyValuePair<string, object>("hasBread", ownInv.breadLevel > 0));
+
+		// Final output
+		worldData.Add(new KeyValuePair<string, object>("hasBreadInStockpile", stockpile.breadLevel > 0));
 		return worldData;
 	}
 

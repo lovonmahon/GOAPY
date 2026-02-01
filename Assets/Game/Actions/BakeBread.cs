@@ -12,6 +12,7 @@ public class BakeBread : GoapAction
     {
         // Planner-facing logic
         addPrecondition("hasFlour", true);
+        addPrecondition("hasBread", false);
         addEffect("hasBread", true);
     }
     void Awake()
@@ -49,6 +50,9 @@ public class BakeBread : GoapAction
         if (isInterrupted() || worker.GetNeedsToHide())
             return false;
 
+        Backpack inv = agent.GetComponent<Backpack>();
+        if (inv.flourLevel < 2)
+            return false;
         if (startTime == 0f)
         {
             Debug.Log("Starting: " + ActionName);
@@ -58,8 +62,7 @@ public class BakeBread : GoapAction
         if (Time.time - startTime > workDuration)
         {
             Debug.Log("Finished: " + ActionName);
-
-            Backpack inv = agent.GetComponent<Backpack>();
+            
             inv.flourLevel -= 2;
             inv.breadLevel += 1;
 
