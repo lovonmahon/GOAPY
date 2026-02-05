@@ -959,7 +959,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ed33cc63d953d147bd82f1a74368714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawOffset: 0
+  drawOffset: 10
   inventoryName: Agent's Inventory
 --- !u!114 &743796555
 MonoBehaviour:
@@ -1114,7 +1114,7 @@ GameObject:
   - component: {fileID: 832067436}
   - component: {fileID: 832067435}
   m_Layer: 0
-  m_Name: Windmill Worker
+  m_Name: Miller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1144,7 +1144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ed33cc63d953d147bd82f1a74368714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawOffset: 0
+  drawOffset: 100
   inventoryName: Agent's Inventory
 --- !u!114 &832067428
 MonoBehaviour:

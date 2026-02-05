@@ -59,7 +59,7 @@ public class DeliverBread : GoapAction {
 		}
             
 		Backpack inv = agent.GetComponent<Backpack>();
-        if (inv.breadLevel < 5)
+        if (inv.breadLevel < 1)
             return false;
 		
 		if (startTime == 0)
@@ -72,8 +72,8 @@ public class DeliverBread : GoapAction {
 		{
 			Debug.Log("Finished: " + ActionName);
 			
-			inv.breadLevel -= 5;
-            marketInventory.breadLevel += 5;
+			inv.breadLevel -= 1;
+            marketInventory.breadLevel += 1;
 
 			completed = true;
 		}

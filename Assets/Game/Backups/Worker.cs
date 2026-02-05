@@ -72,7 +72,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 		worldData.Add(new KeyValuePair<string, object>("hasFlourAtMill", windmill.flourLevel > 0));
 
 		// Baker backpack
-		worldData.Add(new KeyValuePair<string, object>("hasFlour", ownInv.flourLevel > 0));
+		worldData.Add(new KeyValuePair<string, object>("hasFlour", ownInv.flourLevel >= 2));
 
 		// Baker backpack
 		worldData.Add(new KeyValuePair<string, object>("hasBread", ownInv.breadLevel > 0));

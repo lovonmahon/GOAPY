@@ -12,7 +12,7 @@ public class BakeBread : GoapAction
     {
         // Planner-facing logic
         addPrecondition("hasFlour", true);
-        addPrecondition("hasBread", false);
+        
         addEffect("hasBread", true);
     }
     void Awake()

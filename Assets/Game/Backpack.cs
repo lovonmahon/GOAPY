@@ -49,7 +49,7 @@ public class Backpack : MonoBehaviour
 		GUI.Box(new Rect(0, drawOffset, 150, 80), inventoryName);
 
 		GUI.Label(new Rect(10, 20 + drawOffset, 100, 20), "Flour: " + flourLevel);
-		GUI.Label(new Rect(10, 35 + drawOffset, 100, 20), "Bread: " + breadLevel);
-		GUI.Label(new Rect(10, 40 + drawOffset, 100, 20), "Wheat: " + wheatLevel);
+		GUI.Label(new Rect(10, 40 + drawOffset, 100, 20), "Bread: " + breadLevel);
+		GUI.Label(new Rect(10, 60 + drawOffset, 100, 20), "Wheat: " + wheatLevel);
 	}
 }

@@ -11,8 +11,10 @@ public class DeliverWheat : GoapAction {
 	public DeliverWheat () 
 	{
 		addPrecondition ("hasWheat", true); 
+
 		// After delivery, agent no longer has wheat
 		addEffect ("hasWheat", false);
+		addEffect("hasWheatAtMill", true);
 
 		// World can now produce flour since wheat has been dropped off
 	}
@@ -70,6 +72,7 @@ public class DeliverWheat : GoapAction {
             Debug.Log("Finished: " + ActionName);
             inv.wheatLevel -= 5;
             windmillInv.wheatLevel += 5;
+			completed = true;
 		}
 		return true;
 	}
