@@ -1,0 +1,7 @@
+add starvation penalties
+
+villager happiness
+
+bread demand scaling
+
+or a Hauler role under pressure
