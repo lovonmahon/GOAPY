@@ -16,7 +16,9 @@ public abstract class Worker : MonoBehaviour, IGoap
 	[Tooltip("Stockpile")]
 	public Inventory stockpile;
 	public Inventory windmill;
+	public Inventory granary;
 	public Inventory wheatField;
+	public Inventory ironMine;
 	public Backpack ownInv;
 	Inventory inv;
 	// public Inventory forest;
@@ -52,6 +54,8 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 	public HashSet<KeyValuePair<string,object>> GetWorldState () 
 	{
+		Debug.Log($"[WorldState] windmill instance = {granary.GetInstanceID()} flour = {granary.flourLevel}");
+
 		HashSet<KeyValuePair<string,object>> worldData = new HashSet<KeyValuePair<string,object>> ();
 		// Danger / safety state (for GOAP interrupt handling)
 		worldData.Add(new KeyValuePair<string, object>("enemyVisible", hide));
@@ -65,20 +69,22 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 		// Miller backpack
 		worldData.Add(new KeyValuePair<string, object>("hasWheat", ownInv.wheatLevel > 0));
-		worldData.Add(new KeyValuePair<string, object>("hasWheatAtMill", windmill.wheatLevel > 0));
+		worldData.Add(new KeyValuePair<string, object>("hasWheatAtMill", granary.wheatLevel > 0));
 
 
 		// Flour exists at the mill (Miller goal, Baker dependency)
-		worldData.Add(new KeyValuePair<string, object>("hasFlourAtMill", windmill.flourLevel > 0));
+		worldData.Add(new KeyValuePair<string, object>("hasFlourAtMill", granary.flourLevel > 0));
 
 		// Baker backpack
-		worldData.Add(new KeyValuePair<string, object>("hasFlour", ownInv.flourLevel >= 2));
-
-		// Baker backpack
+		worldData.Add(new KeyValuePair<string, object>("hasFlour", ownInv.flourLevel >= 1));
 		worldData.Add(new KeyValuePair<string, object>("hasBread", ownInv.breadLevel > 0));
+
+		// Iron Miner Backpack
+		worldData.Add(new KeyValuePair<string, object>("hasIronOre", ownInv.ironOreLevel >= 1));
 
 		// Final output
 		worldData.Add(new KeyValuePair<string, object>("hasBreadInStockpile", stockpile.breadLevel > 0));
+		worldData.Add(new KeyValuePair<string, object>("hasIronOreInStockpile", stockpile.ironOreLevel > 0));
 		return worldData;
 	}
 
@@ -95,10 +101,16 @@ public abstract class Worker : MonoBehaviour, IGoap
 	public bool MoveAgent(GoapAction nextAction) 
 	{
 		//if we don't need to move anywhere
-		if(previousDestination == nextAction.target.transform.position)
+		// if(previousDestination == nextAction.target.transform.position)
+		// {
+		// 	nextAction.setInRange(true);
+		// 	return true;
+		// }
+
+		if (Vector3.Distance(previousDestination, nextAction.target.transform.position) < 0.1f)
 		{
-			nextAction.setInRange(true);
-			return true;
+		    nextAction.setInRange(true);
+		    return true;
 		}
 		
 		agent.SetDestination(nextAction.target.transform.position);

@@ -1,32 +1,30 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class PickupFlour : GoapAction
+public class MineIronOre : GoapAction
 {
     bool completed = false;
     float startTime = 0f;
     public float workDuration = 2f; // seconds
 
-    public Inventory granary;
     Worker worker;
+    public Inventory ironMine;
 
-    public PickupFlour()
+    public MineIronOre()
     {
         // Planner-facing logic
-        addPrecondition("hasFlour", false);
-        addPrecondition("hasFlourAtMill", true);
-
-        addEffect("hasFlour", true);
+        addPrecondition("hasIronOre", false);
+        
+        addEffect("hasIronOre", true);
     }
     void Awake()
     {
-        ActionName = "Pickup Flour From Mill";
+        ActionName = "Mine Iron Ore";
     }
 
     public override void reset()
     {
         completed = false;
         startTime = 0f;
-        target = null;
     }
 
     public override bool isDone()
@@ -42,26 +40,21 @@ public class PickupFlour : GoapAction
     public override bool checkProceduralPrecondition(GameObject agent)
     {
         worker = agent.GetComponent<Worker>();
-        granary = worker.granary;
 
-        if (granary == null)
-            return false;
-
-        target = granary.gameObject;
-        return granary.flourLevel > 0;
+        ironMine = worker.ironMine;
+        target = ironMine.gameObject;
+        return ironMine != null;
     }
 
     public override bool perform(GameObject agent)
     {
-        Debug.Log($"[PickupFlour] granary instance = {granary.GetInstanceID()} flour = {granary.flourLevel}");
-
         // Abort if danger appears
         if (isInterrupted() || worker.GetNeedsToHide())
             return false;
 
-        if (granary.flourLevel < 1)
-            return false;
-
+        Backpack inv = agent.GetComponent<Backpack>();
+        // if (inv.ironOreLevel < 1)
+        //     return false;
         if (startTime == 0f)
         {
             Debug.Log("Starting: " + ActionName);
@@ -71,10 +64,9 @@ public class PickupFlour : GoapAction
         if (Time.time - startTime > workDuration)
         {
             Debug.Log("Finished: " + ActionName);
-
-            Backpack inv = agent.GetComponent<Backpack>();
-            inv.flourLevel += 1;
-            granary.flourLevel -= 1;
+            
+            inv.ironOreLevel += 1;
+            // ironMine.ironOreLevel += 1;
 
             completed = true;
         }

@@ -9,7 +9,7 @@ public class IronOreMiner : Worker
    public override HashSet<KeyValuePair<string,object>> CreateGoalState ()
 	{
 		HashSet<KeyValuePair<string,object>> goal = new HashSet<KeyValuePair<string,object>> ();
-		goal.Add(new KeyValuePair<string, object>("mineIronOre", true ));
+		goal.Add(new KeyValuePair<string, object>("hasIronOreInStockpile", true ));
         
 		return goal;
 	}
@@ -17,7 +17,7 @@ public class IronOreMiner : Worker
     // Update is called once per frame
     void Update()
     {
-        UpdateAnimator();
+        // UpdateAnimator();
     }
 
     void UpdateAnimator()

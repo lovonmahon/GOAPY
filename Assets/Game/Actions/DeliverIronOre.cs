@@ -1,26 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class DeliverBread : GoapAction {
+public class DeliverIronOre : GoapAction {
 
 	bool completed = false;
 	float startTime = 0;
 	public float workDuration = 2; // seconds
 	Worker worker;
-	public Inventory marketInventory;
+	public Inventory stockpile;
 	
-	public DeliverBread () 
+	public DeliverIronOre () 
 	{
 		// Planner-facing logic
-        addPrecondition("hasBread", true);
+        addPrecondition("hasIronOre", true);
 
-        addEffect("hasBread", false);
-        addEffect("hasBreadInStockpile", true);
+        addEffect("hasIronOre", false);
+        addEffect("hasIronOreInStockpile", true);
 	}
     void Awake()
     {
-        ActionName = "Deliver Bread";
+        ActionName = "Deliver Iron Ore";
     }
 
     public override void reset ()
@@ -43,11 +41,11 @@ public class DeliverBread : GoapAction {
 	{	
 		worker = agent.GetComponent<Worker>();
 
-        marketInventory = worker.stockpile;
-        if (marketInventory == null) return false;
+        stockpile = worker.stockpile;
+        if (stockpile == null) return false;
 
-        target = marketInventory.gameObject;
-        return marketInventory != null;
+        target = stockpile.gameObject;
+        return stockpile != null;
 	}
 	
 	public override bool perform (GameObject agent)
@@ -59,7 +57,7 @@ public class DeliverBread : GoapAction {
 		}
             
 		Backpack inv = agent.GetComponent<Backpack>();
-        if (inv.breadLevel < 1)
+        if (inv.ironOreLevel < 1)
             return false;
 		
 		if (startTime == 0)
@@ -72,12 +70,11 @@ public class DeliverBread : GoapAction {
 		{
 			Debug.Log("Finished: " + ActionName);
 			
-			inv.breadLevel -= 1;
-            marketInventory.breadLevel += 1;
+			inv.ironOreLevel -= 1;
+            stockpile.ironOreLevel += 1;
 
 			completed = true;
 		}
 		return true;
 	}
-	
 }

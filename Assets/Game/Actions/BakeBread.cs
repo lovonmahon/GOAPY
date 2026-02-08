@@ -51,7 +51,7 @@ public class BakeBread : GoapAction
             return false;
 
         Backpack inv = agent.GetComponent<Backpack>();
-        if (inv.flourLevel < 2)
+        if (inv.flourLevel < 1)
             return false;
         if (startTime == 0f)
         {
@@ -63,7 +63,7 @@ public class BakeBread : GoapAction
         {
             Debug.Log("Finished: " + ActionName);
             
-            inv.flourLevel -= 2;
+            inv.flourLevel -= 1;
             inv.breadLevel += 1;
 
             completed = true;

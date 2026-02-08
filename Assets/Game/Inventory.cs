@@ -5,7 +5,7 @@ using UnityEngine;
 public class Inventory : MonoBehaviour 
 {
 
-	public int wheatLevel = 5;
+	public int wheatLevel = 15;
 	public int flourLevel = 5;
 	public int breadLevel = 0;
 	public int logs = 0;
@@ -13,7 +13,7 @@ public class Inventory : MonoBehaviour
 	public int buildingSupplies = 0;
 	public int tools = 0;
 	public int lumber = 0;
-	public int ironOre = 0;
+	public int ironOreLevel = 0;
 	public int drawOffset = 120; //vertical offset on the screen. “How far down from the top should I draw this UI?”
 	public string inventoryName = "Inventory";
 

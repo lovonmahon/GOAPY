@@ -12,7 +12,7 @@ public class Backpack : MonoBehaviour
     }
 
 	//Bread
-	private int m_breadLevel = 0;
+	private int m_breadLevel = 1;
 	public int breadLevel
 	{
         get => m_breadLevel;
@@ -34,6 +34,13 @@ public class Backpack : MonoBehaviour
         get => m_logs;
         set => m_logs = value < 0 ? 0 : value;
     }
+
+	private int m_ironOreLevel = 0;
+	public int ironOreLevel
+	{
+		get => m_ironOreLevel;
+		set => m_ironOreLevel = value < 0? 0: value;
+	}
 
 	// public int buildingSupplies = 0;
 
