@@ -54,7 +54,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 	public HashSet<KeyValuePair<string,object>> GetWorldState () 
 	{
-		Debug.Log($"[WorldState] windmill instance = {granary.GetInstanceID()} flour = {granary.flourLevel}");
+		// Debug.Log($"[WorldState] windmill instance = {granary.GetInstanceID()} flour = {granary.flourLevel}");
 
 		HashSet<KeyValuePair<string,object>> worldData = new HashSet<KeyValuePair<string,object>> ();
 		// Danger / safety state (for GOAP interrupt handling)
@@ -114,8 +114,8 @@ public abstract class Worker : MonoBehaviour, IGoap
 		}
 		
 		agent.SetDestination(nextAction.target.transform.position);
-		
-		if (agent.hasPath && agent.remainingDistance < 2) 
+
+		if (agent.hasPath && agent.remainingDistance <= 1) 
 		{
 			nextAction.setInRange(true);
 			previousDestination = nextAction.target.transform.position;

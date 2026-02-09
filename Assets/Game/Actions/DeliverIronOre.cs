@@ -1,12 +1,15 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class DeliverIronOre : GoapAction {
 
-	bool completed = false;
+	[SerializeField] Animator m_animator;
+    bool completed = false;
 	float startTime = 0;
 	public float workDuration = 2; // seconds
 	Worker worker;
 	public Inventory stockpile;
+    [SerializeField] NavMeshAgent m_navAgent;
 	
 	public DeliverIronOre () 
 	{
@@ -25,11 +28,14 @@ public class DeliverIronOre : GoapAction {
 	{
 		completed = false;
 		startTime = 0;
+        setInRange(false);
+        m_navAgent.isStopped = false;
 	}
 	
 	public override bool isDone ()
 	{
-		return completed;
+		
+        return completed;
 	}
 	
 	public override bool requiresInRange ()
@@ -55,6 +61,8 @@ public class DeliverIronOre : GoapAction {
 		{
 			return false;
 		}
+
+        if(!isInRange()) return true; //back out and reevaluate perform until in range to proceed with task
             
 		Backpack inv = agent.GetComponent<Backpack>();
         if (inv.ironOreLevel < 1)
@@ -62,8 +70,13 @@ public class DeliverIronOre : GoapAction {
 		
 		if (startTime == 0)
 		{
-			Debug.Log("Starting: " + ActionName);
+            Debug.Log("Starting: " + ActionName);
 			startTime = Time.time;
+            m_navAgent.isStopped = true;
+            if( m_animator!= null)
+            {
+                m_animator.SetTrigger("Dropoff");
+            }
 		}
 
 		if (Time.time - startTime > workDuration) 
@@ -72,7 +85,7 @@ public class DeliverIronOre : GoapAction {
 			
 			inv.ironOreLevel -= 1;
             stockpile.ironOreLevel += 1;
-
+            
 			completed = true;
 		}
 		return true;
