@@ -48,17 +48,18 @@ public class AttackAction : GoapAction
     float startTime = 0f;
 
     Worker worker;
+    void Awake()
+    {
+        ActionName = "Attack the enemy";
+    }
 
     public AttackAction()
     {
-        // Planner-facing conditions
         addPrecondition("enemyVisible", true);
-        addPrecondition("enemyWeaker", true);
+        addPrecondition("enemyInRange", true);
+        addPrecondition("healthyEnoughToAttack", true);
 
-        // After a successful attack, the area is safe
-        addEffect("isSafe", true);
-
-        name = "Attack Enemy";
+        addEffect("enemyDead", true);
     }
 
     public override void reset()

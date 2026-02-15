@@ -3,13 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using RiseReign;
+using System;
 
+[RequireComponent(typeof(EnemySensor))]
 /// <summary>
+/// //Base class for all AI types
 /// Worker -> What it does: Reports world facts, Signals danger (NeedsToHide) & Does NOT interrupt or replan
 /// </summary>
+
 public abstract class Worker : MonoBehaviour, IGoap
 {
-	//Base class for all AI types
+	public enum Faction
+	{
+		VILLAGER,
+		PREDATOR
+	}
+	
+	[SerializeField]
+    protected Faction faction;
+
+    public Faction GetFaction()
+    {
+        return faction;
+    }
 	NavMeshAgent agent;
 	Vector3 previousDestination;
 	
@@ -24,12 +40,25 @@ public abstract class Worker : MonoBehaviour, IGoap
 	// public Inventory forest;
 	public bool close = false;
 	bool hide = false;
-	public float moveSpeed = 1.5f;
+	float safetyFactor;
+	public float safety
+	{
+		get => safetyFactor;
+		set => safetyFactor = value;
+	}
+
+	EnemySensor m_enemySensor;
+	public float attackRange = 2f;
+	public float currentHealth = 100f;
+	public float maxHealth = 100f;
+
+	[SerializeField] float m_normalmoveSpeed;
 	void Start()
 	{
 		agent = this.GetComponent<NavMeshAgent>();
-		// inv = this.GetComponent<Inventory>();
+		if(agent != null) agent.speed = m_normalmoveSpeed;
 		ownInv = this.GetComponent<Backpack>();
+		m_enemySensor = GetComponent<EnemySensor>();
 	}
 
 	Vector3 lastKnownThreatPosition;
@@ -54,12 +83,62 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 	public HashSet<KeyValuePair<string,object>> GetWorldState () 
 	{
-		// Debug.Log($"[WorldState] windmill instance = {granary.GetInstanceID()} flour = {granary.flourLevel}");
-
 		HashSet<KeyValuePair<string,object>> worldData = new HashSet<KeyValuePair<string,object>> ();
 		// Danger / safety state (for GOAP interrupt handling)
-		worldData.Add(new KeyValuePair<string, object>("enemyVisible", hide));
-		worldData.Add(new KeyValuePair<string, object>("isSafe", !hide));		
+
+		// *******************Old danger logic**************************
+		//Dynamically compute
+		// bool enemyVisible = safetyFactor < 10f;
+    	// bool avoidEnemy = !enemyVisible;
+
+		// worldData.Add(new KeyValuePair<string, object>("avoidEnemy", avoidEnemy));
+		//******************************************
+		//*****************New danger logic***********************
+		Worker enemy = null;
+
+		if (m_enemySensor != null)
+		{
+		    m_enemySensor.Scan();
+		    enemy = m_enemySensor.GetCurrentEnemy();
+		}
+
+		// Detect enemy
+		//***************************************************
+		bool enemyVisible = enemy != null;
+		bool enemyInRange = false;
+
+		if (enemyVisible)
+		{
+		    float distance = Vector3.Distance(
+		        transform.position,
+		        enemy.transform.position
+		    );
+
+		    enemyInRange = distance <= attackRange;
+		}
+
+
+		// if (enemyVisible)
+		// {
+		//     //when comparing distance .sqrMagnitude is cheaper.  
+		// 	// If the actual numerical value is needed, the more expensive .magnitude is necessary
+		// 	float sqrDistance = (transform.position - enemy.transform.position).sqrMagnitude;
+
+		//     enemyInRange = sqrDistance <= attackRange * attackRange;
+		// }
+		bool enemyDead = enemy != null && enemy.IsDead();
+		//****************************************************
+		//Sticking to manually calling SetHide() for now.  Will use this later for auto-dynamic avoidance
+		// bool avoidEnemy = enemyVisible && GetHealthPercent() < 0.8f;
+		// worldData.Add(new KeyValuePair<string, object>("avoidEnemy", avoidEnemy));
+
+		worldData.Add(new KeyValuePair<string, object>("enemyVisible", enemyVisible));
+		worldData.Add(new KeyValuePair<string, object>("enemyInRange", enemyInRange));
+		worldData.Add(new KeyValuePair<string, object>("enemyDead", enemyDead));
+		worldData.Add(new KeyValuePair<string, object>("healthPercent", currentHealth / maxHealth));
+
+		//**********************************************
+
 		worldData.Add(new KeyValuePair<string, object>("canSeePlayer", false ));
 
 		// ===== FOOD PIPELINE (CORRECT & ROLE-SAFE) =====
@@ -85,33 +164,15 @@ public abstract class Worker : MonoBehaviour, IGoap
 		// Final output
 		worldData.Add(new KeyValuePair<string, object>("hasBreadInStockpile", stockpile.breadLevel > 0));
 		worldData.Add(new KeyValuePair<string, object>("hasIronOreInStockpile", stockpile.ironOreLevel > 0));
+		// worldData.Add(new KeyValuePair<string, object>("hasIronOreInStockpile", ownInv.ironOreLevel == 0));
 		return worldData;
 	}
 
-
 	public abstract HashSet<KeyValuePair<string,object>> CreateGoalState ();
-	// {
-	// 	// HashSet<KeyValuePair<string,object>> goal = new HashSet<KeyValuePair<string,object>> ();
-	// 	// goal.Add(new KeyValuePair<string, object>("doJob", true ));
-
-	// 	// return goal;
-	// }
-
 
 	public bool MoveAgent(GoapAction nextAction) 
 	{
-		//if we don't need to move anywhere
-		// if(previousDestination == nextAction.target.transform.position)
-		// {
-		// 	nextAction.setInRange(true);
-		// 	return true;
-		// }
-
-		if (Vector3.Distance(previousDestination, nextAction.target.transform.position) < 0.1f)
-		{
-		    nextAction.setInRange(true);
-		    return true;
-		}
+		//TODo: optimize by using .sqrMagnitude since only comparing distances?
 		
 		agent.SetDestination(nextAction.target.transform.position);
 
@@ -135,10 +196,6 @@ public abstract class Worker : MonoBehaviour, IGoap
          	float turnAngle = Vector3.Angle(this.transform.forward,toTarget);
          	agent.acceleration = turnAngle * agent.speed;
 		}
-		// if(GetComponent<Sight>().isInFOV)
-		// {
-		// 	interrupt = true;
-		// }
 	}
 
 	public void PlanFailed (HashSet<KeyValuePair<string, object>> failedGoal)
@@ -158,6 +215,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 	public void PlanAborted (GoapAction aborter)
 	{
+		
 		// Reset the failed action
     	if (aborter != null)
     	{
@@ -167,7 +225,8 @@ public abstract class Worker : MonoBehaviour, IGoap
     	// Stop moving
     	if (agent != null)
     	{
-    	    agent.ResetPath();
+    	    agent.isStopped = false;
+			agent.ResetPath();
     	}
 	}
 
@@ -178,6 +237,42 @@ public abstract class Worker : MonoBehaviour, IGoap
 
 	public void SetHide(bool hideOrNot)
 	{
+		Debug.Log("Called SetHide");
 		hide = hideOrNot;
+		GoapAgent agent = GetComponent<GoapAgent>();
+    	if (agent != null)
+    	{
+    	    agent.InterruptAction();
+			Debug.Log("Called interruption");
+    	}
+	}
+	public bool IsDead()
+	{
+	    return currentHealth <= 0f;
+	}
+
+	public float GetHealthPercent()
+	{
+	    return currentHealth / maxHealth;
+	}
+    void OnEnable()
+    {
+        HideAction.panicSpeedEventNotifier += SetPanicApeed;
+		HideAction.normalAgentSpeedEventNotifier += ResumeNormalSpeed;
+    }
+    void OnDisable()
+    {
+        HideAction.panicSpeedEventNotifier -= SetPanicApeed;
+		HideAction.normalAgentSpeedEventNotifier -= ResumeNormalSpeed;
+    }
+	void SetPanicApeed(float panicSpeed)
+	{
+		agent.speed *= panicSpeed;
+		Debug.Log($"PANIC SPEED ACTIVATED! {agent.speed}");
+	}
+	void ResumeNormalSpeed()
+	{
+		agent.speed *= m_normalmoveSpeed;
+		Debug.Log($"Back to normal speed {agent.speed}");
 	}
 }

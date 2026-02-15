@@ -1,9 +1,14 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+//Make sure navmeshagent stopping distance = 0
+//or else isInRange will return true prematurely
+//And the agent will perform when not close to the target
+
 public class MineIronOre : GoapAction
 {
     [SerializeField] Animator m_animator;
+    NavMeshAgent m_agent;
     bool completed = false;
     float startTime = 0f;
     public float workDuration = 2f; // seconds
@@ -22,13 +27,14 @@ public class MineIronOre : GoapAction
     void Awake()
     {
         ActionName = "Mine Iron Ore";
+        m_agent = GetComponent<NavMeshAgent>();
     }
 
     public override void reset()
     {
         completed = false;
         startTime = 0f;
-        setInRange(false);
+        // setInRange(false);
     }
 
     public override bool isDone()
@@ -44,6 +50,11 @@ public class MineIronOre : GoapAction
     public override bool checkProceduralPrecondition(GameObject agent)
     {
         worker = agent.GetComponent<Worker>();
+        if( m_agent!= null) m_agent.speed = 0.45f;
+        if (isInterrupted() || worker.GetNeedsToHide())
+        {
+            return false;
+        }
 
         ironMine = worker.ironMine;
         target = ironMine.gameObject;
@@ -54,10 +65,12 @@ public class MineIronOre : GoapAction
     {
         // Abort if danger appears
         if (isInterrupted() || worker.GetNeedsToHide())
+        {
+            m_animator.ResetTrigger("Mine");
             return false;
-
+        }
+            
         if(!isInRange()) return true; //back out and reevaluate perform until in range to proceed with task
-
         Backpack inv = agent.GetComponent<Backpack>();
 
         if (startTime == 0f)

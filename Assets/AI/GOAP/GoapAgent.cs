@@ -75,7 +75,8 @@ public sealed class GoapAgent : MonoBehaviour {
         LoadActions();
     }
 
-    void Update () {
+    void Update () 
+    {
         stateMachine.Update(this.gameObject);
     }
 
@@ -216,6 +217,7 @@ public sealed class GoapAgent : MonoBehaviour {
 
             // Remove completed action
             if (action.isDone()) {
+                action.doReset();
                 currentActions.Dequeue();
             }
 
@@ -310,8 +312,8 @@ public sealed class GoapAgent : MonoBehaviour {
     /// Strategy:
     /// Clear → Reset → Replan
     /// </summary>
-    public void InterruptAction() {
-
+    public void InterruptAction() 
+    {
         Debug.Log("GOAP: Interrupted → Replan");
 
         // Destroy plan

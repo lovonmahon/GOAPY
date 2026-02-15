@@ -78,6 +78,12 @@ public class GoapPlanner
             }
         }
 
+        Debug.Log("=== Usable Actions ===");
+        foreach (var a in usableActions)
+        {
+            Debug.Log(a.GetType().Name);
+        }
+
         // -----------------------------
         // BUILD PLANNING GRAPH
         // -----------------------------

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine;
 
-public class IronOreMiner : Worker
+public class PredatoryAnimal : Worker
 {
-    //Iron Ore miner mines iron ore for the making of tools and weapons
+    //Predatory animal
     void Awake()
     {
-        faction = Faction.VILLAGER;
+        faction = Faction.PREDATOR;
     }
-
     public override HashSet<KeyValuePair<string,object>> CreateGoalState ()
     {
     	HashSet<KeyValuePair<string,object>> goal = new HashSet<KeyValuePair<string,object>> ();
@@ -21,9 +20,9 @@ public class IronOreMiner : Worker
             goal.Add(new KeyValuePair<string, object>("avoidEnemy", true));
             return goal;
         }
-
-        goal.Add(new KeyValuePair<string, object>("hasIronOreInStockpile", true ));
-    	return goal;
+    
+        goal.Add(new KeyValuePair<string, object>("enemyDead", true));
+        return goal;
     }
 
     // Update is called once per frame

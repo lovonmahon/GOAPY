@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+//Make sure navmeshagent stopping distance = 0
+//or else isInRange will return true prematurely
+//And the agent will perform when not close to the target
+
 public class DeliverIronOre : GoapAction {
 
 	[SerializeField] Animator m_animator;
@@ -15,6 +19,7 @@ public class DeliverIronOre : GoapAction {
 	{
 		// Planner-facing logic
         addPrecondition("hasIronOre", true);
+		addPrecondition("hasIronOreInStockpile", false);
 
         addEffect("hasIronOre", false);
         addEffect("hasIronOreInStockpile", true);
@@ -46,6 +51,7 @@ public class DeliverIronOre : GoapAction {
 	public override bool checkProceduralPrecondition (GameObject agent)
 	{	
 		worker = agent.GetComponent<Worker>();
+		if (isInterrupted() || worker.GetNeedsToHide()) return false;
 
         stockpile = worker.stockpile;
         if (stockpile == null) return false;
@@ -61,9 +67,9 @@ public class DeliverIronOre : GoapAction {
 		{
 			return false;
 		}
+		
+		if(!isInRange()) return true; //back out and reevaluate perform until in range to proceed with task
 
-        if(!isInRange()) return true; //back out and reevaluate perform until in range to proceed with task
-            
 		Backpack inv = agent.GetComponent<Backpack>();
         if (inv.ironOreLevel < 1)
             return false;
@@ -76,6 +82,7 @@ public class DeliverIronOre : GoapAction {
             if( m_animator!= null)
             {
                 m_animator.SetTrigger("Dropoff");
+				Debug.Log($"Deliver START — inRange: {isInRange()}");
             }
 		}
 
