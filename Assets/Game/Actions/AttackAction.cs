@@ -80,27 +80,41 @@ public class AttackAction : GoapAction
 
     public override bool checkProceduralPrecondition(GameObject agent)
     {
+        // Debug.Log("AttackAction considered");
+
         worker = agent.GetComponent<Worker>();
-        return worker != null;
+        if(worker == null) return false;
+
+        EnemySensor sensor = worker.GetComponent<EnemySensor>();
+        if (sensor == null) return false;
+
+        Worker enemy = sensor.GetCurrentEnemy();
+        if (enemy == null || enemy.IsDead()) return false;
+
+        target = enemy.gameObject;
+        return true;
     }
 
     public override bool perform(GameObject agent)
     {
         // Abort immediately if danger spikes or fear triggers
         if (isInterrupted() || worker.GetNeedsToHide())
+        {
             return false;
+        }
+        if (target == null) return false;
 
-        // Combat system runs independently.
-        // When it resolves the threat, world state flips.
+        Worker enemy = target.GetComponent<Worker>();
+        if (enemy == null) return false;
 
-        if (!worker.GetNeedsToHide())
+        if (enemy.IsDead())
         {
             completed = true;
             return true;
         }
+        enemy.TakeDamage(10);
 
         // Still attacking successfully
         return true;
     }
-
 }

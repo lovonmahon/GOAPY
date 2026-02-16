@@ -60,6 +60,7 @@ public class MineIronOre : GoapAction
         }
         if (isInterrupted() || worker.GetNeedsToHide())
         {
+            m_agent.speed = worker.boostedSpeed;
             return false;
         }
 

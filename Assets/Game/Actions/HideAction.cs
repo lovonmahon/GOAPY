@@ -138,7 +138,7 @@ public class HideAction : GoapAction
         worker = null;
         agent = null;
         target = null;
-        normalAgentSpeedEventNotifier?.Invoke();
+        
     }
 
     public override bool requiresInRange()
@@ -162,8 +162,6 @@ public class HideAction : GoapAction
         {
             return false;
         }
-        panicSpeedEventNotifier?.Invoke(m_speedMultiplier);
-       
         if (hideSpot == null)
 		{
 			return false;
@@ -182,20 +180,24 @@ public class HideAction : GoapAction
 		//While moving toward the hiding spot, run fast
         if (!hiding)
         {
+            panicSpeedEventNotifier?.Invoke(m_speedMultiplier);
             hiding = true;
         }
         // If not close to the hiding spot, keep reevaluating
+        // Still moving to hide spot
         if (!isInRange())
 		{
 			//true → “I am still executing successfully.”
             //false → “I failed. Abort and replan.”
             return true;
 		}
-        // While hiding, do NOTHING — wait
-        if (worker.GetNeedsToHide())
-		{
+         // If danger is gone → restore speed once and finish
+        if (!worker.GetNeedsToHide())
+        {
+            normalAgentSpeedEventNotifier?.Invoke();
             return true;
-		}
+        }
+        // Stay hiding
         return true;
     }
 
