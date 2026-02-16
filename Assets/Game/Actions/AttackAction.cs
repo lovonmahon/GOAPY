@@ -56,7 +56,6 @@ public class AttackAction : GoapAction
     public AttackAction()
     {
         addPrecondition("enemyVisible", true);
-        addPrecondition("enemyInRange", true);
         addPrecondition("healthyEnoughToAttack", true);
 
         addEffect("enemyDead", true);
@@ -80,7 +79,7 @@ public class AttackAction : GoapAction
 
     public override bool checkProceduralPrecondition(GameObject agent)
     {
-        // Debug.Log("AttackAction considered");
+        Debug.Log("AttackAction considered");
 
         worker = agent.GetComponent<Worker>();
         if(worker == null) return false;
