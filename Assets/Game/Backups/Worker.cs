@@ -13,6 +13,9 @@ using System;
 
 public abstract class Worker : MonoBehaviour, IGoap
 {
+	public static Action<float> updateAnimatorPanicSpeed;
+	public static Func<float> requestAnimatorSpeed;
+
 	public enum Faction
 	{
 		VILLAGER,
@@ -26,7 +29,11 @@ public abstract class Worker : MonoBehaviour, IGoap
     {
         return faction;
     }
-	NavMeshAgent agent;
+	[SerializeField] protected NavMeshAgent agent;
+	[SerializeField] protected Animator m_anim;
+	[SerializeField] protected float walkSpeed = 0.5f;
+	[SerializeField] protected float runSpeed = 1f;
+
 	Vector3 previousDestination;
 	
 	[Tooltip("Stockpile")]
@@ -52,11 +59,12 @@ public abstract class Worker : MonoBehaviour, IGoap
 	public float currentHealth = 100f;
 	public float maxHealth = 100f;
 
-	[SerializeField] float m_normalmoveSpeed;
+	// [SerializeField] float m_normalmoveSpeed;
 	void Start()
 	{
 		agent = this.GetComponent<NavMeshAgent>();
-		if(agent != null) agent.speed = m_normalmoveSpeed;
+		if(m_anim == null) Debug.LogErrorFormat("No Animator component attached!");
+		if(agent != null) agent.speed = walkSpeed;
 		ownInv = this.GetComponent<Backpack>();
 		m_enemySensor = GetComponent<EnemySensor>();
 	}
@@ -187,6 +195,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 			return false;
 		}
 	}
+	float lastSpeed;
 
 	void Update()
 	{
@@ -196,6 +205,16 @@ public abstract class Worker : MonoBehaviour, IGoap
          	float turnAngle = Vector3.Angle(this.transform.forward,toTarget);
          	agent.acceleration = turnAngle * agent.speed;
 		}
+
+		if (agent.speed != lastSpeed)
+    	{
+    	    //See where agent's speed was changed or set.
+			Debug.Log(
+    	        $"SPEED CHANGED to {agent.speed} by stack trace:\n{Environment.StackTrace}"
+    	    );
+    	    lastSpeed = agent.speed;
+    	}
+		UpdateAnimator();
 	}
 
 	public void PlanFailed (HashSet<KeyValuePair<string, object>> failedGoal)
@@ -265,14 +284,43 @@ public abstract class Worker : MonoBehaviour, IGoap
         HideAction.panicSpeedEventNotifier -= SetPanicApeed;
 		HideAction.normalAgentSpeedEventNotifier -= ResumeNormalSpeed;
     }
+	float GetPanicSpeed(float sp)
+	{
+		return sp;
+	}
+	float boostedSpeed;
 	void SetPanicApeed(float panicSpeed)
 	{
 		agent.speed *= panicSpeed;
-		Debug.Log($"PANIC SPEED ACTIVATED! {agent.speed}");
+		boostedSpeed = GetPanicSpeed(agent.speed );
+		Debug.Log($"{this.GetType()}: PANIC SPEED ACTIVATED! {agent.speed}");
 	}
 	void ResumeNormalSpeed()
 	{
-		agent.speed *= m_normalmoveSpeed;
-		Debug.Log($"Back to normal speed {agent.speed}");
+		agent.speed = walkSpeed;
+		Debug.Log($"{this.GetType()}: Back to normal speed {agent.speed}");
 	}
+	void UpdateAnimator()
+    {
+        //First get global velocity on navmesh agent
+        Vector3 velocity = agent.velocity;
+        //convert to local velocity
+        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        //Which direction of interest for movement
+        // float speed = localVelocity.z;
+
+		//Influence the float parameter on the animator by feding it the speed values from the local velocity.
+		//2D directional
+		float moveX = localVelocity.x / walkSpeed;
+    	float moveY = localVelocity.z / walkSpeed;
+
+    	m_anim.SetFloat("MoveX", moveX);
+    	m_anim.SetFloat("MoveY", moveY);
+
+		// 1D directional
+		// speed = Mathf.Clamp(speed, 0f, 2f);
+        // m_anim.SetFloat("MoveY", speed);
+		// m_anim.SetFloat("MoveY", boostedSpeed);
+		Debug.Log($"UpdateAnimator() speed {moveY}");
+    }
 }

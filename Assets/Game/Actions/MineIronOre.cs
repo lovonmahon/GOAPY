@@ -8,7 +8,7 @@ using UnityEngine.AI;
 public class MineIronOre : GoapAction
 {
     [SerializeField] Animator m_animator;
-    NavMeshAgent m_agent;
+    [SerializeField] NavMeshAgent m_agent;
     bool completed = false;
     float startTime = 0f;
     public float workDuration = 2f; // seconds
@@ -27,7 +27,7 @@ public class MineIronOre : GoapAction
     void Awake()
     {
         ActionName = "Mine Iron Ore";
-        m_agent = GetComponent<NavMeshAgent>();
+        if(m_agent == null) Debug.LogError("No NavMeshAgent!");
     }
 
     public override void reset()
@@ -39,6 +39,7 @@ public class MineIronOre : GoapAction
 
     public override bool isDone()
     {
+        // m_agent.speed = 0.5f;
         return completed;
     }
 
@@ -50,7 +51,13 @@ public class MineIronOre : GoapAction
     public override bool checkProceduralPrecondition(GameObject agent)
     {
         worker = agent.GetComponent<Worker>();
-        if( m_agent!= null) m_agent.speed = 0.45f;
+        if( m_agent!= null) m_agent.speed = 0.5f;
+        if(m_agent.speed > 0.75)
+        {
+            Debug.LogError($"{this.GetType()} : Agent walking speed exceeds limit!");
+            m_agent.speed = 0.4f;
+            Debug.Log($"{this.GetType()} is setting agent speed to { m_agent }");
+        }
         if (isInterrupted() || worker.GetNeedsToHide())
         {
             return false;
