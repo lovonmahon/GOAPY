@@ -296,7 +296,7 @@ public abstract class Worker : MonoBehaviour, IGoap
 	
 	public float boostedSpeed;
 	bool isPanicking;
-	void SetPanicApeed(float panicSpeed)
+	public void SetPanicApeed(float panicSpeed)
 	{
 		if( isPanicking) return; //already panicking, no need to do more
 		boostedSpeed = walkSpeed * panicSpeed;

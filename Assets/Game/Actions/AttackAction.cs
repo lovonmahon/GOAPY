@@ -90,6 +90,8 @@ public class AttackAction : GoapAction
         Worker enemy = sensor.GetCurrentEnemy();
         if (enemy == null || enemy.IsDead()) return false;
 
+        worker.SetPanicApeed(5f);
+
         target = enemy.gameObject;
         return true;
     }
